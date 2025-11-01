@@ -1,6 +1,6 @@
 // sw.js — Ámos PWA offline
 // ↑ při každé úpravě SW ZVYŠ cache name -> vynutí se update
-const CACHE_NAME = 'amos-v3-2025-10-29';
+const CACHE_NAME = 'amos-v3-2025-10-30';
 
 const ASSETS = [
   './',
