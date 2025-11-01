@@ -44,6 +44,21 @@ body.fullscreen .board{height:100vh !important;transition:height .2s ease}
 .die.dragging{outline:3px solid rgba(255,255,255,.25)}
 .footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px;color:#9fb0c7}
 
+/* Dřevěný vzhled kostek */
+.die.wood{
+  background-image:url("./icons/wood-texture.jpg"); /* ulož sem svou texturu */
+  background-size:cover;
+  background-position:center;
+  color:#111;
+  border:1px solid #0003;
+}
+
+/* Zamknutý celek – vizuální zvýraznění */
+.die.selected{
+  outline:3px solid #3b82f6;
+  box-shadow:0 0 0 4px rgba(59,130,246,.25), 0 8px 24px rgba(0,0,0,.45);
+}
+
 /* Modal s pravidly */
 .modal{
   position:fixed; inset:0; display:none; align-items:center; justify-content:center;
@@ -66,25 +81,17 @@ body.fullscreen .board{height:100vh !important;transition:height .2s ease}
 }
 .modal-body{flex:1; background:#0b1220}
 .modal-body iframe{width:100%; height:100%; border:0}
-/* Dřevěný vzhled kostek */
-.die.wood{
-  background-image:url("./icons/wood-texture.jpg");
-  background-size:cover;
-  background-position:center;
-  color:#111;                 /* černé písmo pro kontrast na světlém dřevě */
-  border:1px solid #0003;
-}
- 
 </style>
 </head>
 <body>
 <div class="app">
-<div class="topbar">
-  <button id="newGameBtn" class="btn">Nová hra</button>
-  <button id="rulesBtn"   class="btn">Pravidla</button>
-  <button id="styleBtn"   class="btn">Styl: moderní</button>
-  <div id="seedBox" class="code-box" contenteditable="true" title="Klikni a uprav kód"></div>
-</div>
+  <div class="topbar">
+    <button id="newGameBtn" class="btn">Nová hra</button>
+    <button id="rulesBtn"   class="btn">Pravidla</button>
+    <button id="styleBtn"   class="btn">Styl: moderní</button>
+    <button id="langBtn"    class="btn">Jazyk: CZ</button>
+    <div id="seedBox" class="code-box" contenteditable="true" title="Klikni a uprav kód"></div>
+  </div>
 
   <div class="controls" id="controls">
     <label>Velikost kostky:
@@ -99,7 +106,7 @@ body.fullscreen .board{height:100vh !important;transition:height .2s ease}
   </div>
 
   <div id="board" class="board">
-    <div class="hint">Přetahuj prstem a skládej slova.</div>
+    <div class="hint">Přetahuj prstem a skládej slova. Dvojklik na celek = zamknout/odemknout.</div>
   </div>
 
   <div class="footer">
@@ -112,13 +119,13 @@ body.fullscreen .board{height:100vh !important;transition:height .2s ease}
 <div id="rulesModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
   <div class="modal-card">
     <div class="modal-head">
-      <h3>Pravidla hry (AMOS)</h3>
+      <h3>Pravidla hry (ÁMOS)</h3>
       <a class="openlink" href="https://www.deskovehry.info/pravidla/amos.htm" target="_blank" rel="noopener">Otevřít v nové kartě</a>
       <div class="spacer"></div>
       <button id="rulesClose" class="modal-close" aria-label="Zavřít">Zavřít</button>
     </div>
     <div class="modal-body">
-      <iframe src="https://www.deskovehry.info/pravidla/amos.htm" title="Pravidla AMOS"></iframe>
+      <iframe src="https://www.deskovehry.info/pravidla/amos.htm" title="Pravidla ÁMOS"></iframe>
     </div>
   </div>
 </div>
@@ -127,11 +134,11 @@ body.fullscreen .board{height:100vh !important;transition:height .2s ease}
 "use strict";
 
 /* ==== konfigurace ==== */
-const SNAP_THRESH = 14;
-const SNAP_GAP    = 1;
+const SNAP_THRESH = 14; // vzdálenost, kdy začít uvažovat snap
+const SNAP_GAP    = 1;  // mezera po přichycení
 const CONNECT_EPS = 1.5;
 
-/* ==== data písmen ==== */
+/* ==== CZ sada (původní) ==== */
 const DICE_SETS = [
   [ {sym:"Z",val:2}, {sym:"K",val:2}, {sym:"H",val:2}, {sym:"Ch",val:2}, {sym:"D",val:2}, {sym:"R",val:2} ],
   [ {sym:"M",val:2}, {sym:"L",val:2}, {sym:"B",val:2}, {sym:"S",val:2}, {sym:"V",val:2}, {sym:"P",val:2} ],
@@ -147,6 +154,25 @@ const DICE_SETS = [
   [ {sym:"Ť",val:5}, {sym:"Ď",val:5}, {sym:"C",val:2}, {sym:":-)",val:null}, {sym:"J",val:2}, {sym:"Ň",val:5} ],
 ];
 
+/* ==== EN sada (podle tvého rozložení a hodnot) ==== */
+const DICE_SETS_EN = [
+  // 5 samohláskových kostek (E častější; U=2 podle tvé škály)
+  [ {sym:"E",val:1}, {sym:"A",val:1}, {sym:"I",val:1}, {sym:"O",val:1}, {sym:"U",val:2}, {sym:"E",val:1} ],
+  [ {sym:"E",val:1}, {sym:"A",val:1}, {sym:"I",val:1}, {sym:"O",val:1}, {sym:"A",val:1}, {sym:"E",val:1} ],
+  [ {sym:"E",val:1}, {sym:"A",val:1}, {sym:"I",val:1}, {sym:"O",val:1}, {sym:"U",val:2}, {sym:"I",val:1} ],
+  [ {sym:"E",val:1}, {sym:"O",val:1}, {sym:"U",val:2}, {sym:"A",val:1}, {sym:"I",val:1}, {sym:"O",val:1} ],
+  [ {sym:"E",val:1}, {sym:"E",val:1}, {sym:"A",val:1}, {sym:"O",val:1}, {sym:"I",val:1}, {sym:"U",val:2} ],
+
+  // 7 souhláskových kostek (N=2, W=3, F=3, J=5)
+  [ {sym:"T",val:2}, {sym:"R",val:2}, {sym:"L",val:2}, {sym:"S",val:2}, {sym:"N",val:2}, {sym:"D",val:2} ],
+  [ {sym:"R",val:2}, {sym:"T",val:2}, {sym:"N",val:2}, {sym:"H",val:2}, {sym:"C",val:2}, {sym:"P",val:2} ],
+  [ {sym:"M",val:2}, {sym:"B",val:2}, {sym:"G",val:3}, {sym:"Y",val:2}, {sym:"V",val:3}, {sym:"W",val:3} ],
+  [ {sym:"F",val:3}, {sym:"K",val:2}, {sym:"L",val:2}, {sym:"S",val:2}, {sym:"D",val:2}, {sym:"G",val:3} ],
+  [ {sym:"J",val:5}, {sym:"X",val:5}, {sym:"Q",val:5}, {sym:"Z",val:4}, {sym:"K",val:2}, {sym:":-)",val:null} ],
+  [ {sym:"C",val:2}, {sym:"M",val:2}, {sym:"B",val:2}, {sym:"P",val:2}, {sym:"H",val:2}, {sym:"Y",val:2} ],
+  [ {sym:"V",val:3}, {sym:"W",val:3}, {sym:"R",val:2}, {sym:"T",val:2}, {sym:"N",val:2}, {sym:"L",val:2} ],
+];
+
 /* ==== prvky ==== */
 const board = document.getElementById("board");
 const seedBox = document.getElementById("seedBox");
@@ -155,28 +181,47 @@ const fontSizeInput = document.getElementById("fontSize");
 const dieSizeVal = document.getElementById("dieSizeVal");
 const fontSizeVal = document.getElementById("fontSizeVal");
 const newGameBtn = document.getElementById("newGameBtn");
-
-/* Pravidla modal */
 const rulesBtn   = document.getElementById("rulesBtn");
 const rulesModal = document.getElementById("rulesModal");
 const rulesClose = document.getElementById("rulesClose");
-/* ==== přepínač stylu kostek ==== */
-const styleBtn = document.getElementById("styleBtn");
-let wooden = localStorage.getItem("amos_wood") === "1";
+const styleBtn   = document.getElementById("styleBtn");
+const langBtn    = document.getElementById("langBtn");
 
-function applyStyle(){
-  dice.forEach(d => d.el.classList.toggle("wood", wooden));
-  if (styleBtn) styleBtn.textContent = wooden ? "Styl: dřevěný" : "Styl: moderní";
-}
-if (styleBtn){
-  styleBtn.addEventListener("click", () => {
-    wooden = !wooden;
-    localStorage.setItem("amos_wood", wooden ? "1" : "0");
-    applyStyle();
-  });
-}
 /* ==== stav ==== */
 let dice=[], seed=generateSeed();
+let language = localStorage.getItem("amos_lang") || "CZ";
+
+/* ==== výběr (zamknutý celek) ==== */
+let selected = new Set();       // vybrané (zamknuté) kostky
+let clusterLocked = false;      // režim zamknutého celku
+
+function applySelectionStyles(){
+  dice.forEach(d => d.el.classList.toggle("selected", selected.has(d)));
+}
+function clearSelection(){
+  selected.clear();
+  clusterLocked = false;
+  applySelectionStyles();
+  // ukonči případný klastrový přesun
+  clusterDrag.active = false;
+  clusterDrag.dies = [];
+  clusterDrag.pointers.clear();
+}
+function selectClusterFrom(die){
+  selected = new Set(getCluster(die));
+  clusterLocked = true;
+  applySelectionStyles();
+}
+function maybeAddToSelectionAfterSnap(active){
+  if(!clusterLocked || selected.has(active)) return;
+  for(const s of selected){
+    if(isAdjacent(active, s) || isAdjacent(s, active)){
+      selected.add(active);
+      applySelectionStyles();
+      break;
+    }
+  }
+}
 
 /* ==== pomocné ==== */
 function generateSeed(){const s="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";let o="";for(let i=0;i<7;i++)o+=s[Math.floor(Math.random()*s.length)];return o;}
@@ -243,33 +288,6 @@ function attemptSnap(active){
   if(target) moveDieTo(active, board.getBoundingClientRect().left+target.x, board.getBoundingClientRect().top+target.y, true);
 }
 
-/* ==== kostky ==== */
-function createDie(i,rand){
-  const el=document.createElement("div"); el.className="die";
-  const s={el,set:DICE_SETS[i],faceIdx:Math.floor(rand()*6),x:0,y:0,dragging:false,pointerId:null,offX:0,offY:0};
-  el.innerHTML=faceHTML(s.set[s.faceIdx]);
-  if (wooden) el.classList.add("wood");
-  el.addEventListener("pointerdown",(e)=>{
-    s.dragging=true; s.pointerId=e.pointerId; el.setPointerCapture(e.pointerId);
-    const r=el.getBoundingClientRect(); s.offX=e.clientX-r.left; s.offY=e.clientY-r.top;
-    el.classList.add("dragging"); el.style.zIndex=String(1000+Date.now()%10000);
-    registerPointer(e.pointerId, s, e.clientX, e.clientY);
-  });
-  el.addEventListener("pointermove",(e)=>{
-    if (clusterDrag.active && activePointers.has(e.pointerId)){ clusterMove(e); return; }
-    if(!s.dragging || e.pointerId!==s.pointerId) return;
-    moveDieTo(s, e.clientX - s.offX, e.clientY - s.offY, true);
-  });
-  el.addEventListener("pointerup",(e)=>{
-    if (clusterDrag.active && activePointers.has(e.pointerId)){ unregisterPointer(e.pointerId); return; }
-    if(s.dragging && e.pointerId===s.pointerId){
-      s.dragging=false; el.classList.remove("dragging"); attemptSnap(s); unregisterPointer(e.pointerId);
-    }
-  });
-  board.appendChild(el);
-  return s;
-}
-
 /* ==== multi-touch klastrový pohyb ==== */
 const activePointers = new Map();
 const clusterDrag = {active:false, dies:[], pointers:new Set()};
@@ -304,6 +322,83 @@ function clusterMove(e){
   for(const d of clusterDrag.dies) moveDieTo(d, b.left + d.x + dx, b.top + d.y + dy, true);
 }
 
+/* ==== kostky ==== */
+function createDie(i, rand, setData){
+  const el=document.createElement("div"); el.className="die";
+  const s={el,set:setData[i],faceIdx:Math.floor(rand()*6),x:0,y:0,dragging:false,pointerId:null,offX:0,offY:0};
+  el.innerHTML=faceHTML(s.set[s.faceIdx]);
+
+  // DŘEVĚNÝ STYL (pokud je zapnut)
+  if (wooden) el.classList.add("wood");
+
+  // Pointer down
+  el.addEventListener("pointerdown",(e)=>{
+    e.stopPropagation();
+
+    // Zamknutý celek: klik na člena => táhni celý klastr
+    if (clusterLocked && selected.has(s)) {
+      el.setPointerCapture(e.pointerId);
+      registerPointer(e.pointerId, s, e.clientX, e.clientY);
+      clusterDrag.active = true;
+      clusterDrag.dies = Array.from(selected);
+      clusterDrag.pointers.add(e.pointerId);
+      s.dragging = false;
+      return;
+    }
+
+    // Běžný individuální drag
+    s.dragging = true; s.pointerId = e.pointerId; el.setPointerCapture(e.pointerId);
+    const r = el.getBoundingClientRect(); s.offX = e.clientX - r.left; s.offY = e.clientY - r.top;
+    el.classList.add("dragging"); el.style.zIndex = String(1000 + Date.now()%10000);
+    registerPointer(e.pointerId, s, e.clientX, e.clientY);
+  });
+
+  // Pointer move
+  el.addEventListener("pointermove",(e)=>{
+    if (clusterLocked && selected.has(s) && activePointers.has(e.pointerId)){
+      clusterMove(e);
+      return;
+    }
+    if (clusterDrag.active && activePointers.has(e.pointerId)){ clusterMove(e); return; }
+    if (!s.dragging || e.pointerId !== s.pointerId) return;
+    moveDieTo(s, e.clientX - s.offX, e.clientY - s.offY, true);
+  });
+
+  // Pointer up
+  el.addEventListener("pointerup",(e)=>{
+    // táhli jsme zamknutý celek -> jen ukonči pointer, bez snapů
+    if (clusterLocked && selected.has(s) && activePointers.has(e.pointerId)) {
+      unregisterPointer(e.pointerId);
+      el.classList.remove("dragging");
+      return;
+    }
+    if (clusterDrag.active && activePointers.has(e.pointerId)){
+      unregisterPointer(e.pointerId);
+      el.classList.remove("dragging");
+      return;
+    }
+    if (s.dragging && e.pointerId === s.pointerId){
+      s.dragging = false; el.classList.remove("dragging");
+      attemptSnap(s);
+      maybeAddToSelectionAfterSnap(s); // v zamknutém režimu přibírej nové dílky po dosednutí
+      unregisterPointer(e.pointerId);
+    }
+  });
+
+  // Dvojklik: zamknout/odemknout celek
+  el.addEventListener("dblclick",(e)=>{
+    e.stopPropagation(); // nevyvolej fullscreen na boardu
+    if (clusterLocked && selected.has(s)){
+      clearSelection();        // odemknout
+    } else {
+      selectClusterFrom(s);    // zamknout propojený klastr
+    }
+  });
+
+  board.appendChild(el);
+  return s;
+}
+
 /* ==== mřížka ==== */
 function arrangeGrid(){
   const b=board.getBoundingClientRect();
@@ -314,13 +409,15 @@ function arrangeGrid(){
 
 /* ==== nová hra ==== */
 function newGame(customSeed=generateSeed()){
+  clearSelection();
   seed = customSeed;
   seedBox.textContent = seed;
   const rand = rngFromSeed(seed);
+  const activeSet = (language === "EN") ? DICE_SETS_EN : DICE_SETS;
 
   board.querySelectorAll(".die").forEach(n=>n.remove());
   dice = [];
-  for(let i=0;i<12;i++) dice.push(createDie(i, rand));
+  for(let i=0;i<12;i++) dice.push(createDie(i, rand, activeSet));
 
   requestAnimationFrame(arrangeGrid);
 }
@@ -351,14 +448,42 @@ seedBox.addEventListener("keydown", e=>{
   if (e.key === "Enter"){ e.preventDefault(); seedBox.blur(); }
 });
 
+/* ==== Styl kostek (moderní/dřevěný) ==== */
+let wooden = localStorage.getItem("amos_wood") === "1";
+function applyStyle(){
+  dice.forEach(d => d.el.classList.toggle("wood", wooden));
+  if (styleBtn) styleBtn.textContent = wooden ? "Styl: dřevěný" : "Styl: moderní";
+}
+if (styleBtn){
+  styleBtn.addEventListener("click", () => {
+    wooden = !wooden;
+    localStorage.setItem("amos_wood", wooden ? "1" : "0");
+    applyStyle();
+  });
+}
+
+/* ==== Jazyk CZ/EN ==== */
+function updateLangBtn(){
+  if (langBtn) langBtn.textContent = (language === "EN") ? "Jazyk: EN" : "Jazyk: CZ";
+}
+if (langBtn){
+  langBtn.addEventListener("click", ()=>{
+    language = (language === "CZ") ? "EN" : "CZ";
+    localStorage.setItem("amos_lang", language);
+    updateLangBtn();
+    newGame(seed); // přegeneruj se stejným seedem
+    applyStyle();
+  });
+}
+
 /* ==== Start ==== */
 newGameBtn.addEventListener("click", ()=> { newGame(); applyStyle(); });
 syncSizes();
 newGame(seed);
 applyStyle();
-  
+updateLangBtn();
 
-/* Úmyslně nic neděláme na resize/orientationchange – pozice zůstávají */
+/* Ponecháme pozice i při změně orientace */
 window.addEventListener("resize", ()=>{});
 
 /* Pojistky pro multitouch „klastr“ – konec až když nejsou žádné prsty */
@@ -375,7 +500,7 @@ rulesClose.addEventListener("click", ()=>{
   rulesModal.setAttribute("aria-hidden","true");
 });
 rulesModal.addEventListener("click", (e)=>{
-  if(e.target === rulesModal){ // klik na pozadí zavře
+  if(e.target === rulesModal){
     rulesModal.classList.remove("open");
     rulesModal.setAttribute("aria-hidden","true");
   }
@@ -387,7 +512,9 @@ window.addEventListener("keydown", (e)=>{
   }
 });
 </script>
-  <script>
+
+<!-- Registrace SW pro PWA offline -->
+<script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
