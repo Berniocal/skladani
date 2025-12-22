@@ -1,6 +1,6 @@
-// sw.js — Ámos PWA offline
+// sw.js — Slovní kostky PWA offline
 // ↑ při každé úpravě SW ZVYŠ cache name -> vynutí se update
-const CACHE_NAME = 'amos-v3-2025-10-30';
+const CACHE_NAME = 'slovni-kostky-v4-2025-12-22';
 
 const ASSETS = [
   './',
@@ -14,7 +14,6 @@ const ASSETS = [
 
   // Textura dřeva (ujisti se, že název sedí!)
   './icons/wood-texture.jpg'
-  // Pokud máš jiný název (např. wood-texture-from-icon.jpg), změň cestu.
 ];
 
 // Instalace: precache základní shell
@@ -28,16 +27,21 @@ self.addEventListener('install', (event) => {
 // Aktivace: smaž staré cache
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.map(k => (k === CACHE_NAME ? null : caches.delete(k))))
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((k) => k !== CACHE_NAME)
+          .map((k) => caches.delete(k))
+      )
     )
   );
   self.clients.claim();
 });
 
 // Fetch strategie:
-// - stejný origin -> cache-first s doplňováním (funguje offline)
-// - cizí origin (např. iframe s pravidly) -> síť-first, bez ukládání
+// - navigace (HTML stránky) -> vždy vrať index.html (SPA)
+// - stejné origin assety -> cache-first + doplnění
+// - cizí origin -> network-first bez ukládání
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
@@ -45,28 +49,34 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   const sameOrigin = url.origin === self.location.origin;
 
+  // Navigace (kliknutí na link / refresh) – vrať shell
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req).catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
   if (sameOrigin) {
     event.respondWith(
-      caches.match(req).then(cached => {
+      caches.match(req).then((cached) => {
         if (cached) return cached;
-        return fetch(req).then(res => {
-          // ulož do runtime cache
-          const copy = res.clone();
-          caches.open(CACHE_NAME).then(c => c.put(req, copy));
-          return res;
-        }).catch(() => {
-          // offline fallback: vrať index (SPA)
-          return caches.match('./index.html');
-        });
+
+        return fetch(req)
+          .then((res) => {
+            // cacheuj jen OK odpovědi
+            if (!res || res.status !== 200) return res;
+
+            const copy = res.clone();
+            caches.open(CACHE_NAME).then((c) => c.put(req, copy));
+            return res;
+          })
+          .catch(() => caches.match('./index.html'));
       })
     );
   } else {
-    // cizí domény – třeba pravidla v iframu
     event.respondWith(
-      fetch(req).catch(() => {
-        // bez internetu iframe nebude – appka ale poběží dál
-        return new Response('', { status: 204 });
-      })
+      fetch(req).catch(() => new Response('', { status: 204 }))
     );
   }
 });
