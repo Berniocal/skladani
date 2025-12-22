@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Ámos – skládání slov</title>
+<title>Slovní kostky – skládání slov</title>
 <meta name="theme-color" content="#0f1722">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -75,12 +75,14 @@ body.fullscreen .board{height:100vh !important;transition:height .2s ease}
 }
 .modal-head h3{margin:0; font-size:16px; color:#cfe0ff}
 .modal-head .spacer{flex:1}
-.modal-head .openlink{font-size:13px; color:#9fb0c7; text-decoration:underline}
 .modal-close{
   background:#1f2937; border:1px solid #2b3a51; color:#e6eef8; border-radius:10px; padding:6px 10px; cursor:pointer;
 }
-.modal-body{flex:1; background:#0b1220}
-.modal-body iframe{width:100%; height:100%; border:0}
+.modal-body{flex:1; background:#0b1220; padding:14px; overflow:auto}
+.modal-body h4{margin:10px 0 6px 0; font-size:14px; color:#cfe0ff}
+.modal-body p, .modal-body li{color:#c9d4e6; font-size:14px; line-height:1.45}
+.modal-body ul{margin:6px 0 12px 18px}
+.smallnote{color:#9fb0c7; font-size:12px; margin-top:10px; opacity:.95}
 </style>
 </head>
 <body>
@@ -111,7 +113,10 @@ body.fullscreen .board{height:100vh !important;transition:height .2s ease}
 
   <div class="footer">
     <div>7-místný kód sjednotí rozložení (A–Z, 0–9). Přepiš a potvrď Enterem.</div>
-    <div>Autor: Jan + asistent 🙂</div>
+    <div>
+      <div>Autor: Jan + asistent 🙂</div>
+      <div style="font-size:12px;opacity:.9">Neoficiální projekt, bez spojení s žádnou komerční deskovou hrou.</div>
+    </div>
   </div>
 </div>
 
@@ -119,13 +124,28 @@ body.fullscreen .board{height:100vh !important;transition:height .2s ease}
 <div id="rulesModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
   <div class="modal-card">
     <div class="modal-head">
-      <h3>Pravidla hry (ÁMOS)</h3>
-      <a class="openlink" href="https://www.deskovehry.info/pravidla/amos.htm" target="_blank" rel="noopener">Otevřít v nové kartě</a>
+      <h3>Pravidla hry</h3>
       <div class="spacer"></div>
       <button id="rulesClose" class="modal-close" aria-label="Zavřít">Zavřít</button>
     </div>
     <div class="modal-body">
-      <iframe src="https://www.deskovehry.info/pravidla/amos.htm" title="Pravidla ÁMOS"></iframe>
+      <h4>Cíl</h4>
+      <p>Skládej slova přikládáním kostek tak, aby na sebe navazovaly (zleva doprava / shora dolů). Kostky můžeš libovolně přesouvat a přeskupovat.</p>
+
+      <h4>Ovládání</h4>
+      <ul>
+        <li>Táhni kostku prstem/myší.</li>
+        <li>Kostky se při přiblížení automaticky „přichytí“ k sousedům.</li>
+        <li>Dvojklik na propojený celek: zamknout/odemknout celek (pak táhneš celek).</li>
+        <li>Dvojklik do hrací plochy: přepnutí na celou obrazovku.</li>
+      </ul>
+
+      <h4>Seed / kód</h4>
+      <p>7místný kód (A–Z, 0–9) sjednotí náhodu: když zadáte stejný kód, všichni uvidí stejné rozložení.</p>
+
+      <p class="smallnote">
+        Pozn.: Tohle jsou pravidla této webové aplikace (ovládání a sdílení rozložení).
+      </p>
     </div>
   </div>
 </div>
@@ -189,7 +209,7 @@ const langBtn    = document.getElementById("langBtn");
 
 /* ==== stav ==== */
 let dice=[], seed=generateSeed();
-let language = localStorage.getItem("amos_lang") || "CZ";
+let language = localStorage.getItem("worddice_lang") || "CZ";
 
 /* ==== výběr (zamknutý celek) ==== */
 let selected = new Set();       // vybrané (zamknuté) kostky
@@ -449,7 +469,7 @@ seedBox.addEventListener("keydown", e=>{
 });
 
 /* ==== Styl kostek (moderní/dřevěný) ==== */
-let wooden = localStorage.getItem("amos_wood") === "1";
+let wooden = localStorage.getItem("worddice_wood") === "1";
 function applyStyle(){
   dice.forEach(d => d.el.classList.toggle("wood", wooden));
   if (styleBtn) styleBtn.textContent = wooden ? "Styl: dřevěný" : "Styl: moderní";
@@ -457,7 +477,7 @@ function applyStyle(){
 if (styleBtn){
   styleBtn.addEventListener("click", () => {
     wooden = !wooden;
-    localStorage.setItem("amos_wood", wooden ? "1" : "0");
+    localStorage.setItem("worddice_wood", wooden ? "1" : "0");
     applyStyle();
   });
 }
@@ -469,7 +489,7 @@ function updateLangBtn(){
 if (langBtn){
   langBtn.addEventListener("click", ()=>{
     language = (language === "CZ") ? "EN" : "CZ";
-    localStorage.setItem("amos_lang", language);
+    localStorage.setItem("worddice_lang", language);
     updateLangBtn();
     newGame(seed); // přegeneruj se stejným seedem
     applyStyle();
