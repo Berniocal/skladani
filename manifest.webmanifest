@@ -1,6 +1,6 @@
 {
   "name": "Skládání slov",
-  "short_name": "Slovní kostky",
+  "short_name": "Skládání slov",
   "description": "Přetahuj písmenka, tvoř slova a sdílej rozložení přes 7místný kód.",
   "start_url": "./",
   "scope": "./",
