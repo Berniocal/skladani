@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Slovní kostky – skládání slov</title>
+<title>Skládání slov</title>
 <meta name="theme-color" content="#0f1722">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -44,7 +44,7 @@ body.fullscreen .board{height:100vh !important;transition:height .2s ease}
 .die.dragging{outline:3px solid rgba(255,255,255,.25)}
 .footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px;color:#9fb0c7}
 
-/* Dřevěný vzhled kostek */
+
 .die.wood{
   background-image:url("./icons/wood-texture.jpg"); /* ulož sem svou texturu */
   background-size:cover;
@@ -96,7 +96,7 @@ body.fullscreen .board{height:100vh !important;transition:height .2s ease}
   </div>
 
   <div class="controls" id="controls">
-    <label>Velikost kostky:
+    <label>Velikost písmenek:
       <input id="dieSize" type="range" min="40" max="140" step="2" />
       <span id="dieSizeVal"></span>
     </label>
@@ -130,12 +130,12 @@ body.fullscreen .board{height:100vh !important;transition:height .2s ease}
     </div>
     <div class="modal-body">
       <h4>Cíl</h4>
-      <p>Skládej slova přikládáním kostek tak, aby na sebe navazovaly (zleva doprava / shora dolů). Kostky můžeš libovolně přesouvat a přeskupovat.</p>
+      <p>Skládej slova přikládáním písmenek tak, aby na sebe navazovaly (zleva doprava / shora dolů). Písmenka můžeš libovolně přesouvat a přeskupovat.</p>
 
       <h4>Ovládání</h4>
       <ul>
-        <li>Táhni kostku prstem/myší.</li>
-        <li>Kostky se při přiblížení automaticky „přichytí“ k sousedům.</li>
+        <li>Táhni písmenko prstem/myší.</li>
+        <li>Písmenka se při přiblížení automaticky „přichytí“ k sousedům.</li>
         <li>Dvojklik na propojený celek: zamknout/odemknout celek (pak táhneš celek).</li>
         <li>Dvojklik do hrací plochy: přepnutí na celou obrazovku.</li>
       </ul>
@@ -176,14 +176,14 @@ const DICE_SETS = [
 
 /* ==== EN sada (podle tvého rozložení a hodnot) ==== */
 const DICE_SETS_EN = [
-  // 5 samohláskových kostek (E častější; U=2 podle tvé škály)
+ 
   [ {sym:"E",val:1}, {sym:"A",val:1}, {sym:"I",val:1}, {sym:"O",val:1}, {sym:"U",val:2}, {sym:"E",val:1} ],
   [ {sym:"E",val:1}, {sym:"A",val:1}, {sym:"I",val:1}, {sym:"O",val:1}, {sym:"A",val:1}, {sym:"E",val:1} ],
   [ {sym:"E",val:1}, {sym:"A",val:1}, {sym:"I",val:1}, {sym:"O",val:1}, {sym:"U",val:2}, {sym:"I",val:1} ],
   [ {sym:"E",val:1}, {sym:"O",val:1}, {sym:"U",val:2}, {sym:"A",val:1}, {sym:"I",val:1}, {sym:"O",val:1} ],
   [ {sym:"E",val:1}, {sym:"E",val:1}, {sym:"A",val:1}, {sym:"O",val:1}, {sym:"I",val:1}, {sym:"U",val:2} ],
 
-  // 7 souhláskových kostek (N=2, W=3, F=3, J=5)
+
   [ {sym:"T",val:2}, {sym:"R",val:2}, {sym:"L",val:2}, {sym:"S",val:2}, {sym:"N",val:2}, {sym:"D",val:2} ],
   [ {sym:"R",val:2}, {sym:"T",val:2}, {sym:"N",val:2}, {sym:"H",val:2}, {sym:"C",val:2}, {sym:"P",val:2} ],
   [ {sym:"M",val:2}, {sym:"B",val:2}, {sym:"G",val:3}, {sym:"Y",val:2}, {sym:"V",val:3}, {sym:"W",val:3} ],
@@ -212,7 +212,7 @@ let dice=[], seed=generateSeed();
 let language = localStorage.getItem("worddice_lang") || "CZ";
 
 /* ==== výběr (zamknutý celek) ==== */
-let selected = new Set();       // vybrané (zamknuté) kostky
+let selected = new Set();       /
 let clusterLocked = false;      // režim zamknutého celku
 
 function applySelectionStyles(){
@@ -342,7 +342,7 @@ function clusterMove(e){
   for(const d of clusterDrag.dies) moveDieTo(d, b.left + d.x + dx, b.top + d.y + dy, true);
 }
 
-/* ==== kostky ==== */
+
 function createDie(i, rand, setData){
   const el=document.createElement("div"); el.className="die";
   const s={el,set:setData[i],faceIdx:Math.floor(rand()*6),x:0,y:0,dragging:false,pointerId:null,offX:0,offY:0};
@@ -468,7 +468,7 @@ seedBox.addEventListener("keydown", e=>{
   if (e.key === "Enter"){ e.preventDefault(); seedBox.blur(); }
 });
 
-/* ==== Styl kostek (moderní/dřevěný) ==== */
+
 let wooden = localStorage.getItem("worddice_wood") === "1";
 function applyStyle(){
   dice.forEach(d => d.el.classList.toggle("wood", wooden));
