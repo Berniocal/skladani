@@ -1,7 +1,7 @@
 {
-  "name": "Ámos – skládání slov",
-  "short_name": "Ámos",
-  "description": "Přetahuj kostky, tvoř slova a sdílej rozložení přes 7místný kód.",
+  "name": "Slovní kostky – skládání slov",
+  "short_name": "Slovní kostky",
+  "description": "Přetahuj kostky, tvoř slova a sdílej rozložení přes 7místný kód. Neoficiální fanouškovský projekt, bez spojení s žádnou komerční deskovou hrou.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
