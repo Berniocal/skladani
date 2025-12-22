@@ -1,7 +1,7 @@
 {
-  "name": "Slovní kostky – skládání slov",
+  "name": "Skládání slov",
   "short_name": "Slovní kostky",
-  "description": "Přetahuj kostky, tvoř slova a sdílej rozložení přes 7místný kód. Neoficiální fanouškovský projekt, bez spojení s žádnou komerční deskovou hrou.",
+  "description": "Přetahuj písmenka, tvoř slova a sdílej rozložení přes 7místný kód.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
