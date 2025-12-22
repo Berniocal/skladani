@@ -1,6 +1,6 @@
 // sw.js — Slovní kostky PWA offline
 // ↑ při každé úpravě SW ZVYŠ cache name -> vynutí se update
-const CACHE_NAME = 'slovni-kostky-v4-2025-12-22';
+const CACHE_NAME = 'skladani-slov-v4-2025-12-22';
 
 const ASSETS = [
   './',
