@@ -41,6 +41,15 @@ body.fullscreen .board{height:100vh !important;transition:height .2s ease}
 }
 .die .face{display:flex;align-items:flex-end;gap:6px;white-space:nowrap}
 .die sub{font-size:.48em;line-height:1;position:relative;bottom:-.1em;opacity:.9}
+
+/* Zákaz označování textu (písmen/čísel) – aby to nekazilo drag */
+body, .die, .die *{
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none; /* iOS: vypne "kopírovat" bublinu */
+}
 .die.dragging{outline:3px solid rgba(255,255,255,.25)}
 .footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px;color:#9fb0c7}
 
