@@ -1,14 +1,15 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="cs">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>Skládání slov</title>
-<meta name="theme-color" content="#0f1722">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="./icons/icon-192.png">
-<link rel="manifest" href="./manifest.webmanifest">
+<meta content="#0f1722" name="theme-color"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<link href="./icons/icon-192.png" rel="apple-touch-icon"/>
+<link href="./manifest.webmanifest" rel="manifest"/>
 <style>
 :root{
   --die: 50px; --fsize: 30px; --gap: 12px; --pad: 8px;
@@ -92,73 +93,62 @@ body, .die, .die *{
 .modal-body p, .modal-body li{color:#c9d4e6; font-size:14px; line-height:1.45}
 .modal-body ul{margin:6px 0 12px 18px}
 .smallnote{color:#9fb0c7; font-size:12px; margin-top:10px; opacity:.95}
+.scoreBox{position:absolute;right:10px;bottom:10px;font-size:12px;color:#c9d4e6;opacity:.9;}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="topbar">
-    <button id="newGameBtn" class="btn">Nová hra</button>
-    <button id="rulesBtn"   class="btn">Pravidla</button>
-    <button id="styleBtn"   class="btn">Styl: moderní</button>
-    <button id="langBtn"    class="btn">Jazyk: CZ</button>
-    <div id="seedBox" class="code-box" contenteditable="true" title="Klikni a uprav kód"></div>
-  </div>
-
-  <div class="controls" id="controls">
-    <label>Velikost písmenek:
-      <input id="dieSize" type="range" min="40" max="140" step="2" />
-      <span id="dieSizeVal"></span>
-    </label>
-    <label>Velikost písma:
-      <input id="fontSize" type="range" min="22" max="48" step="1" />
-      <span id="fontSizeVal"></span>
-    </label>
-    <span style="font-size:13px;color:#9fb0c7;">(Dvojklik do hrací plochy = celá obrazovka)</span>
-  </div>
-
-  <div id="board" class="board">
-    <div class="hint">Přetahuj prstem a skládej slova. Dvojklik na celek = zamknout/odemknout.</div>
-  </div>
-
-  <div class="footer">
-    <div>7-místný kód sjednotí rozložení (A–Z, 0–9). Přepiš a potvrď Enterem.</div>
-    <div>
-      <div>Autor: Jan + asistent 🙂</div>
-      <div style="font-size:12px;opacity:.9">Neoficiální projekt, bez spojení s žádnou komerční deskovou hrou.</div>
-    </div>
-  </div>
+<div class="topbar">
+<button class="btn" id="newGameBtn">Nová hra</button>
+<button class="btn" id="rulesBtn">Pravidla</button>
+<button class="btn" id="styleBtn">Styl: moderní</button>
+<button class="btn" id="scoreToggle">Počítání bodů: ✖</button>
+<!-- <button id="langBtn"    class="btn">Jazyk: CZ</button> -->
+<div class="code-box" contenteditable="true" id="seedBox" title="Klikni a uprav kód"></div>
+</div>
+<div class="controls" id="controls">
+<label>Velikost písmenek:
+      <input id="dieSize" max="140" min="40" step="2" type="range"/>
+<span id="dieSizeVal"></span>
+</label>
+<label>Velikost písma:
+      <input id="fontSize" max="48" min="22" step="1" type="range"/>
+<span id="fontSizeVal"></span>
+</label>
+<span style="font-size:13px;color:#9fb0c7;">(Dvojklik do hrací plochy = celá obrazovka)</span>
+</div>
+<div class="board" id="board">
+<div class="hint">Přetahuj prstem a skládej slova. Dvojklik na celek = zamknout/odemknout.</div>
+<div class="scoreBox" id="scoreBox">Skóre: 0</div>
 </div>
 
+</div>
 <!-- Modal Pravidla -->
-<div id="rulesModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
-  <div class="modal-card">
-    <div class="modal-head">
-      <h3>Pravidla hry</h3>
-      <div class="spacer"></div>
-      <button id="rulesClose" class="modal-close" aria-label="Zavřít">Zavřít</button>
-    </div>
-    <div class="modal-body">
-      <h4>Cíl</h4>
-      <p>Skládej slova přikládáním písmenek tak, aby na sebe navazovaly (zleva doprava / shora dolů). Písmenka můžeš libovolně přesouvat a přeskupovat.</p>
-
-      <h4>Ovládání</h4>
-      <ul>
-        <li>Táhni písmenko prstem/myší.</li>
-        <li>Písmenka se při přiblížení automaticky „přichytí“ k sousedům.</li>
-        <li>Dvojklik na propojený celek: zamknout/odemknout celek (pak táhneš celek).</li>
-        <li>Dvojklik do hrací plochy: přepnutí na celou obrazovku.</li>
-      </ul>
-
-      <h4>Seed / kód</h4>
-      <p>7místný kód (A–Z, 0–9) sjednotí náhodu: když zadáte stejný kód, všichni uvidí stejné rozložení.</p>
-
-      <p class="smallnote">
+<div aria-hidden="true" aria-modal="true" class="modal" id="rulesModal" role="dialog">
+<div class="modal-card">
+<div class="modal-head">
+<h3>Pravidla hry</h3>
+<div class="spacer"></div>
+<button aria-label="Zavřít" class="modal-close" id="rulesClose">Zavřít</button>
+</div>
+<div class="modal-body">
+<h4>Cíl</h4>
+<p>Skládej slova přikládáním písmenek tak, aby na sebe navazovaly (zleva doprava / shora dolů). Písmenka můžeš libovolně přesouvat a přeskupovat.</p>
+<h4>Ovládání</h4>
+<ul>
+<li>Táhni písmenko prstem/myší.</li>
+<li>Písmenka se při přiblížení automaticky „přichytí“ k sousedům.</li>
+<li>Dvojklik na propojený celek: zamknout/odemknout celek (pak táhneš celek).</li>
+<li>Dvojklik do hrací plochy: přepnutí na celou obrazovku.</li>
+</ul>
+<h4>Seed / kód</h4>
+<p>7místný kód (A–Z, 0–9) sjednotí náhodu: když zadáte stejný kód, všichni uvidí stejné rozložení.</p>
+<p class="smallnote">
         Pozn.: Tohle jsou pravidla této webové aplikace (ovládání a sdílení rozložení).
       </p>
-    </div>
-  </div>
 </div>
-
+</div>
+</div>
 <script>
 "use strict";
 
@@ -409,6 +399,7 @@ function createDie(i, rand, setData){
     if (s.dragging && e.pointerId === s.pointerId){
       s.dragging = false; el.classList.remove("dragging");
       attemptSnap(s);
+      computeScore();
       maybeAddToSelectionAfterSnap(s); // v zamknutém režimu přibírej nové dílky po dosednutí
       unregisterPointer(e.pointerId);
     }
@@ -540,8 +531,41 @@ window.addEventListener("keydown", (e)=>{
     rulesModal.setAttribute("aria-hidden","true");
   }
 });
-</script>
 
+let scoreEnabled = false;
+const scoreBox = document.getElementById("scoreBox");
+const scoreToggle = document.getElementById("scoreToggle");
+
+scoreToggle.addEventListener("click", ()=>{
+  scoreEnabled = !scoreEnabled;
+  scoreToggle.textContent = "Počítání bodů: " + (scoreEnabled ? "✔" : "✖");
+  if(!scoreEnabled) scoreBox.textContent = "Skóre: 0";
+});
+
+function countConnections(die){
+  let c = 0;
+  for(const o of dice){
+    if(o===die) continue;
+    if(isAdjacent(die,o)||isAdjacent(o,die)) c++;
+  }
+  return c;
+}
+
+function computeScore(){
+  if(!scoreEnabled) return;
+  let sum = 0;
+  for(const d of dice){
+    const val = d.set[d.faceIdx].val;
+    if(val == null) continue;
+    const c = countConnections(d);
+    if(c === 0) sum -= val;
+    else if(c === 1) sum += val;
+    else sum += 2 * val;
+  }
+  scoreBox.textContent = "Skóre: " + sum;
+}
+
+</script>
 <!-- Registrace SW pro PWA offline -->
 <script>
 if ('serviceWorker' in navigator) {
