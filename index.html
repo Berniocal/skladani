@@ -107,13 +107,9 @@ body, .die, .die *{
 <div class="code-box" contenteditable="true" id="seedBox" title="Klikni a uprav kód"></div>
 </div>
 <div class="controls" id="controls">
-<label>Velikost písmenek:
+<label>Velikost:
       <input id="dieSize" max="140" min="40" step="2" type="range"/>
 <span id="dieSizeVal"></span>
-</label>
-<label>Velikost písma:
-      <input id="fontSize" max="48" min="22" step="1" type="range"/>
-<span id="fontSizeVal"></span>
 </label>
 <span style="font-size:13px;color:#9fb0c7;">(Dvojklik do hrací plochy = celá obrazovka)</span>
 </div>
@@ -196,9 +192,7 @@ const DICE_SETS_EN = [
 const board = document.getElementById("board");
 const seedBox = document.getElementById("seedBox");
 const dieSizeInput = document.getElementById("dieSize");
-const fontSizeInput = document.getElementById("fontSize");
 const dieSizeVal = document.getElementById("dieSizeVal");
-const fontSizeVal = document.getElementById("fontSizeVal");
 const newGameBtn = document.getElementById("newGameBtn");
 const rulesBtn   = document.getElementById("rulesBtn");
 const rulesModal = document.getElementById("rulesModal");
@@ -445,15 +439,11 @@ function newGame(customSeed=generateSeed()){
 /* ==== posuvníky ==== */
 function syncSizes(){
   const side=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--die"),10);
-  const fs  =parseInt(getComputedStyle(document.documentElement).getPropertyValue("--fsize"),10);
   dieSizeInput.value=side; dieSizeVal.textContent=side+" px";
-  fontSizeInput.value=fs;  fontSizeVal.textContent=fs+" px";
 }
 dieSizeInput.addEventListener("input", e=>{
   document.documentElement.style.setProperty("--die", e.target.value+"px");
-});
-fontSizeInput.addEventListener("input", e=>{
-  document.documentElement.style.setProperty("--fsize", e.target.value+"px");
+  document.documentElement.style.setProperty("--fsize", (e.target.value*0.6)+"px");
 });
 
 /* ==== fullscreen (dvojklik do hrací plochy) ==== */
