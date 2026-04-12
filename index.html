@@ -553,18 +553,50 @@ function countConnections(die){
 
 function computeScore(){
   if(!scoreEnabled) return;
+
   let sum = 0;
+
   for(const d of dice){
     const val = d.set[d.faceIdx].val;
     if(val == null) continue;
-    const c = countConnections(d);
-    if(c === 0) sum -= val;
-    else if(c === 1) sum += val;
-    else sum += 2 * val;
+
+    let horizontal = false;
+    let vertical = false;
+
+    for(const o of dice){
+      if(o === d) continue;
+
+      const A = dieRect(d);
+      const B = dieRect(o);
+
+      const overlapX = overlap(A.left, A.right, B.left, B.right);
+      const overlapY = overlap(A.top, A.bottom, B.top, B.bottom);
+      const need = A.side * 0.5;
+
+      // vodorovné spojení (vlevo/vpravo)
+      if(overlapY >= need){
+        if(Math.abs(A.left - (B.right + SNAP_GAP)) <= CONNECT_EPS) horizontal = true;
+        if(Math.abs(A.right - (B.left - SNAP_GAP)) <= CONNECT_EPS) horizontal = true;
+      }
+
+      // svislé spojení (nahoře/dole)
+      if(overlapX >= need){
+        if(Math.abs(A.top - (B.bottom + SNAP_GAP)) <= CONNECT_EPS) vertical = true;
+        if(Math.abs(A.bottom - (B.top - SNAP_GAP)) <= CONNECT_EPS) vertical = true;
+      }
+    }
+
+    if(!horizontal && !vertical){
+      sum -= val;
+    } else if(horizontal && vertical){
+      sum += 2 * val;
+    } else {
+      sum += val;
+    }
   }
+
   scoreBox.textContent = "Skóre: " + sum;
 }
-
 </script>
 <!-- Registrace SW pro PWA offline -->
 <script>
