@@ -107,6 +107,12 @@ body, .die, .die *{
 <div class="code-box" contenteditable="true" id="seedBox" title="Klikni a uprav kód"></div>
 </div>
 <div class="controls" id="controls">
+
+<label>Ověřit slovo:
+  <input id="wordInput" placeholder="Zadej slovo" style="margin-left:6px;padding:4px 6px;border-radius:6px;border:1px solid #2b3a51;background:#0b1220;color:#e6eef8;">
+  <button id="checkWordBtn" class="btn" style="margin-left:6px;">Ověřit</button>
+</label>
+
 <label>Velikost:
       <input id="dieSize" max="140" min="40" step="2" type="range"/>
 <span id="dieSizeVal"></span>
@@ -116,6 +122,8 @@ body, .die, .die *{
 <div class="board" id="board">
 <div class="hint">Přetahuj prstem a skládej slova. Dvojklik na celek = zamknout/odemknout.</div>
 <div class="scoreBox" id="scoreBox">Skóre: 0</div>
+<iframe id="dictFrame" style="position:absolute;left:10px;bottom:40px;width:300px;height:200px;border:1px solid #2b3a51;border-radius:8px;background:#0b1220;"></iframe>
+
 </div>
 
 </div>
@@ -587,6 +595,14 @@ if(val == null) val = 1;
 
   scoreBox.textContent = "Skóre: " + sum;
 }
+
+document.getElementById("checkWordBtn").addEventListener("click", ()=>{
+  const word = document.getElementById("wordInput").value.trim();
+  if(!word) return;
+  document.getElementById("dictFrame").src =
+    "https://www.scrabblex.cz/hledat/" + encodeURIComponent(word);
+});
+
 </script>
 <!-- Registrace SW pro PWA offline -->
 <script>
