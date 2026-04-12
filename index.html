@@ -557,8 +557,8 @@ function computeScore(){
   let sum = 0;
 
   for(const d of dice){
-    const val = d.set[d.faceIdx].val;
-    if(val == null) continue;
+let val = d.set[d.faceIdx].val;
+if(val == null) val = 1;
 
     let horizontal = false;
     let vertical = false;
