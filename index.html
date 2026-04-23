@@ -109,6 +109,7 @@ body, .die, .die *{
 <div class="controls" id="controls">
 <button id="checkWordBtn" class="btn">Ověřit slovo</button>
 <button id="timerBtn" class="btn">0:00</button>
+<button id="timerStartBtn" class="btn">Start</button>
 <label>Velikost:
       <input id="dieSize" max="140" min="40" step="2" type="range"/>
 <span id="dieSizeVal"></span>
@@ -596,8 +597,10 @@ if(val == null) val = 1;
 /* ==== TIMER ==== */
 let timerSeconds = 0;
 let timerInterval = null;
+let timerRunning = false;
 
 const timerBtn = document.getElementById("timerBtn");
+const timerStartBtn = document.getElementById("timerStartBtn");
 const timerDisplay = document.getElementById("timerDisplay");
 const timeUpMsg = document.getElementById("timeUpMsg");
 
@@ -621,13 +624,23 @@ timerBtn.addEventListener("click", ()=>{
 
   timerSeconds = m*60 + s;
   timerBtn.textContent = formatTime(timerSeconds);
-  startTimer();
+  timerDisplay.textContent = "";
+});
+
+timerStartBtn.addEventListener("click", ()=>{
+  if(!timerRunning){
+    startTimer();
+  }else{
+    stopTimer();
+  }
 });
 
 function startTimer(){
   if(timerInterval) clearInterval(timerInterval);
 
   let t = timerSeconds;
+  timerRunning = true;
+  timerStartBtn.textContent = "Stop";
   timerDisplay.textContent = formatTime(t);
 
   timerInterval = setInterval(()=>{
@@ -636,12 +649,22 @@ function startTimer(){
 
     if(t <= 0){
       clearInterval(timerInterval);
+      timerRunning = false;
+      timerStartBtn.textContent = "Start";
+
       for(let i=0;i<3;i++) setTimeout(beep, i*200);
 
       timeUpMsg.style.display = "block";
       setTimeout(()=> timeUpMsg.style.display = "none", 2000);
     }
   },1000);
+}
+
+function stopTimer(){
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerStartBtn.textContent = "Start";
+  timerDisplay.textContent = "";
 }
 
 function beep(){
@@ -681,11 +704,7 @@ board.addEventListener("pointerup", (e)=>{
   const dy = e.clientY - swipeStartY;
   const dt = Date.now() - swipeStartTime;
 
-  if(
-    dx < -80 &&
-    Math.abs(dy) < 60 &&
-    dt < 600
-  ){
+  if(dx < -80 && Math.abs(dy) < 60 && dt < 600){
     document.getElementById("checkWordBtn").click();
   }
 
