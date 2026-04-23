@@ -108,6 +108,9 @@ body, .die, .die *{
 </div>
 <div class="controls" id="controls">
 <button id="checkWordBtn" class="btn">Ověřit slovo</button>
+
+<button id="timerBtn" class="btn">0:00</button>
+
 <label>Velikost:
       <input id="dieSize" max="140" min="40" step="2" type="range"/>
 <span id="dieSizeVal"></span>
@@ -117,6 +120,8 @@ body, .die, .die *{
 <div class="board" id="board">
 <div class="hint">Přetahuj prstem a skládej slova. Dvojklik na celek = zamknout/odemknout.</div>
 <div class="scoreBox" id="scoreBox">Skóre: 0</div>
+<div id="timerDisplay" style="position:absolute;left:10px;bottom:10px;font-size:14px;color:#c9d4e6;"></div>
+<div id="timeUpMsg" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;color:#ff6b6b;display:none;">Čas vypršel</div>
 </div>
 
 </div>
@@ -588,6 +593,97 @@ if(val == null) val = 1;
 
   scoreBox.textContent = "Skóre: " + sum;
 }
+
+
+/* ==== TIMER ==== */
+let timerSeconds = 0;
+let timerInterval = null;
+
+const timerBtn = document.getElementById("timerBtn");
+const timerDisplay = document.getElementById("timerDisplay");
+const timeUpMsg = document.getElementById("timeUpMsg");
+
+function formatTime(s){
+  const m = Math.floor(s/60);
+  const sec = s%60;
+  return m + ":" + String(sec).padStart(2,"0");
+}
+
+timerBtn.addEventListener("click", ()=>{
+  let input = prompt("Zadej čas (mm:ss)", formatTime(timerSeconds || 0));
+  if(!input) return;
+
+  const parts = input.split(":");
+  if(parts.length !== 2) return;
+
+  const m = parseInt(parts[0]);
+  const s = parseInt(parts[1]);
+
+  if(isNaN(m) || isNaN(s)) return;
+
+  timerSeconds = m*60 + s;
+  timerBtn.textContent = formatTime(timerSeconds);
+});
+
+timerBtn.addEventListener("contextmenu", (e)=>{
+  e.preventDefault();
+  startTimer();
+});
+
+function startTimer(){
+  if(timerInterval) clearInterval(timerInterval);
+
+  let t = timerSeconds;
+
+  timerDisplay.textContent = formatTime(t);
+
+  timerInterval = setInterval(()=>{
+    t--;
+    timerDisplay.textContent = formatTime(t);
+
+    if(t <= 0){
+      clearInterval(timerInterval);
+
+      beep(); beep(); beep();
+
+      timeUpMsg.style.display = "block";
+      setTimeout(()=> timeUpMsg.style.display = "none", 2000);
+    }
+  },1000);
+}
+
+function beep(){
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+
+  o.connect(g);
+  g.connect(ctx.destination);
+
+  o.frequency.value = 800;
+  o.start();
+
+  g.gain.setValueAtTime(1, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+
+  o.stop(ctx.currentTime + 0.2);
+}
+
+/* ==== SWIPE ==== */
+let startX = 0;
+
+board.addEventListener("pointerdown", (e)=>{
+  if(e.clientX > window.innerWidth - 30){
+    startX = e.clientX;
+  }
+});
+
+board.addEventListener("pointerup", (e)=>{
+  if(startX && e.clientX < window.innerWidth/2){
+    document.getElementById("checkWordBtn").click();
+  }
+  startX = 0;
+});
 
 document.getElementById("checkWordBtn").addEventListener("click", ()=>{
   window.open(
