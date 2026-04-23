@@ -108,9 +108,7 @@ body, .die, .die *{
 </div>
 <div class="controls" id="controls">
 <button id="checkWordBtn" class="btn">Ověřit slovo</button>
-
 <button id="timerBtn" class="btn">0:00</button>
-
 <label>Velikost:
       <input id="dieSize" max="140" min="40" step="2" type="range"/>
 <span id="dieSizeVal"></span>
@@ -623,10 +621,6 @@ timerBtn.addEventListener("click", ()=>{
 
   timerSeconds = m*60 + s;
   timerBtn.textContent = formatTime(timerSeconds);
-});
-
-timerBtn.addEventListener("contextmenu", (e)=>{
-  e.preventDefault();
   startTimer();
 });
 
@@ -634,7 +628,6 @@ function startTimer(){
   if(timerInterval) clearInterval(timerInterval);
 
   let t = timerSeconds;
-
   timerDisplay.textContent = formatTime(t);
 
   timerInterval = setInterval(()=>{
@@ -643,8 +636,7 @@ function startTimer(){
 
     if(t <= 0){
       clearInterval(timerInterval);
-
-      beep(); beep(); beep();
+      for(let i=0;i<3;i++) setTimeout(beep, i*200);
 
       timeUpMsg.style.display = "block";
       setTimeout(()=> timeUpMsg.style.display = "none", 2000);
@@ -669,20 +661,35 @@ function beep(){
   o.stop(ctx.currentTime + 0.2);
 }
 
-/* ==== SWIPE ==== */
-let startX = 0;
+/* ==== SWIPE ZPRAVA ==== */
+let swipeStartX = null;
+let swipeStartY = null;
+let swipeStartTime = null;
 
 board.addEventListener("pointerdown", (e)=>{
-  if(e.clientX > window.innerWidth - 30){
-    startX = e.clientX;
+  if(e.clientX > window.innerWidth - 40){
+    swipeStartX = e.clientX;
+    swipeStartY = e.clientY;
+    swipeStartTime = Date.now();
   }
 });
 
 board.addEventListener("pointerup", (e)=>{
-  if(startX && e.clientX < window.innerWidth/2){
+  if(swipeStartX === null) return;
+
+  const dx = e.clientX - swipeStartX;
+  const dy = e.clientY - swipeStartY;
+  const dt = Date.now() - swipeStartTime;
+
+  if(
+    dx < -80 &&
+    Math.abs(dy) < 60 &&
+    dt < 600
+  ){
     document.getElementById("checkWordBtn").click();
   }
-  startX = 0;
+
+  swipeStartX = null;
 });
 
 document.getElementById("checkWordBtn").addEventListener("click", ()=>{
