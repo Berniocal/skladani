@@ -94,6 +94,52 @@ body, .die, .die *{
 .modal-body ul{margin:6px 0 12px 18px}
 .smallnote{color:#9fb0c7; font-size:12px; margin-top:10px; opacity:.95}
 .scoreBox{position:absolute;right:10px;bottom:10px;font-size:12px;color:#c9d4e6;opacity:.9;}
+
+/* ==== SPODNÍ LIŠTA ==== */
+.bottomBar{
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 6px 12px;
+  background: rgba(15, 23, 34, 0.95);
+  border-top: 1px solid #2b3a51;
+
+  z-index: 2000;
+}
+
+.bottom-left,
+.bottom-center,
+.bottom-right{
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.bottom-left{ justify-content: flex-start; }
+.bottom-center{ justify-content: center; }
+.bottom-right{ justify-content: flex-end; }
+
+.bottomBar .btn{
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+.bottomBar #scoreBox{
+  position: static;
+  font-size: 13px;
+}
+
+.bottomBar #timerDisplay{
+  position: static;
+  font-size: 14px;
+}
+
 </style>
 </head>
 <body>
@@ -107,7 +153,7 @@ body, .die, .die *{
 <div class="code-box" contenteditable="true" id="seedBox" title="Klikni a uprav kód"></div>
 </div>
 <div class="controls" id="controls">
-<button id="checkWordBtn" class="btn">Ověřit slovo</button>
+
 <button id="timerBtn" class="btn">0:00</button>
 <button id="timerStartBtn" class="btn">Start</button>
 <label>Velikost:
@@ -118,8 +164,7 @@ body, .die, .die *{
 </div>
 <div class="board" id="board">
 <div class="hint">Přetahuj prstem a skládej slova. Dvojklik na celek = zamknout/odemknout.</div>
-<div class="scoreBox" id="scoreBox">Skóre: 0</div>
-<div id="timerDisplay" style="position:absolute;left:10px;bottom:10px;font-size:14px;color:#c9d4e6;"></div>
+
 <div id="timeUpMsg" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;color:#ff6b6b;display:none;">Čas vypršel</div>
 </div>
 
@@ -149,6 +194,24 @@ body, .die, .die *{
       </p>
 </div>
 </div>
+</div>
+
+<div class="bottomBar">
+
+  <div class="bottom-left">
+    <div id="timerDisplay">5:00</div>
+  </div>
+
+  <div class="bottom-center">
+    <button id="checkWordBtn" class="btn">Ověřit slovo</button>
+  </div>
+
+  <div class="bottom-right">
+    <div id="scoreBox">Skóre: 0</div>
+  </div>
+
+</div>
+
 </div>
 <script>
 "use strict";
@@ -610,6 +673,9 @@ function formatTime(s){
   return m + ":" + String(sec).padStart(2,"0");
 }
 
+timerBtn.textContent = formatTime(timerSeconds);
+timerDisplay.textContent = formatTime(timerSeconds);
+
 timerBtn.addEventListener("click", ()=>{
   let input = prompt("Zadej čas (mm:ss)", formatTime(timerSeconds || 0));
   if(!input) return;
@@ -624,8 +690,7 @@ timerBtn.addEventListener("click", ()=>{
 
   timerSeconds = m*60 + s;
   timerBtn.textContent = formatTime(timerSeconds);
-  timerDisplay.textContent = "";
-});
+ });
 
 timerStartBtn.addEventListener("click", ()=>{
   if(!timerRunning){
@@ -728,6 +793,10 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.error('SW registrace selhala:', err));
   });
 }
+
+
 </script>
+
+
 </body>
 </html>
