@@ -403,8 +403,7 @@ body, .die, .die *{
   </div>
 
   <div class="board" id="board">
-    <div class="hint">Přetahuj prstem a skládej slova. Dvojklik na celek = zamknout/odemknout.</div>
-    <div id="timeUpMsg">Čas vypršel</div>
+       <div id="timeUpMsg">Čas vypršel</div>
   </div>
 </div>
 
@@ -416,20 +415,38 @@ body, .die, .die *{
       <div class="spacer"></div>
       <button aria-label="Zavřít" class="modal-close" id="rulesClose">Zavřít</button>
     </div>
-    <div class="modal-body">
-      <h4>Cíl</h4>
-      <p>Skládej slova přikládáním písmenek tak, aby na sebe navazovaly zleva doprava nebo shora dolů. Písmenka můžeš libovolně přesouvat a přeskupovat.</p>
-      <h4>Ovládání</h4>
-      <ul>
-        <li>Táhni písmenko prstem nebo myší.</li>
-        <li>Písmenka se při přiblížení automaticky „přichytí“ k sousedům.</li>
-        <li>Dvojklik na propojený celek: zamknout nebo odemknout celek.</li>
-        <li>Dvojklik do hrací plochy: přepnutí na celou obrazovku.</li>
-      </ul>
-      <h4>Seed / kód</h4>
-      <p>7místný kód A–Z a 0–9 sjednotí náhodu: když zadáte stejný kód, všichni uvidí stejné rozložení.</p>
-      <p class="smallnote">Pozn.: Tohle jsou pravidla této webové aplikace.</p>
-    </div>
+<div class="modal-body">
+  <h4>Cíl hry</h4>
+  <p>Cílem hry je během časového limitu poskládat z vylosovaných písmen co nejlepší česká slova a získat co nejvíce bodů.</p>
+
+  <h4>Začátek hry</h4>
+  <ul>
+    <li>Každá hra má svůj 7místný kód.</li>
+    <li>Stejný kód vytvoří všem hráčům stejná písmena.</li>
+    <li>Časovač je defaultně nastavený na 5 minut.</li>
+    <li>Kliknutím na čas lze čas upravit.</li>
+  </ul>
+
+  <h4>Skládání slov</h4>
+  <ul>
+    <li>Písmena se přetahují myší nebo prstem.</li>
+    <li>Když je písmeno dostatečně blízko jiného písmena, automaticky se přichytí.</li>
+    <li>Slova lze skládat vodorovně i svisle.</li>
+    <li>Dvojklik na spojený celek ho zamkne nebo odemkne.</li>
+  </ul>
+
+  <h4>Bodování</h4>
+  <ul>
+    <li>Každé písmeno má svoji bodovou hodnotu.</li>
+    <li>Písmeno zapojené do jednoho směru se počítá jednou.</li>
+    <li>Písmeno zapojené vodorovně i svisle se počítá dvakrát.</li>
+    <li>Samostatné nepřipojené písmeno body odečítá.</li>
+    <li>Tlačítkem „Skóre“ lze bodování vypnout nebo znovu zapnout.</li>
+  </ul>
+
+  <h4>Ověření slov</h4>
+  <p>Tlačítko „Ověřit slovo“ otevře externí slovník, kde si můžete ověřit platnost slova.</p>
+</div>
   </div>
 </div>
 
