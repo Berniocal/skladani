@@ -127,7 +127,12 @@ body.fullscreen .board{
   box-shadow:var(--softShadow);
   transition:transform .12s ease, background .12s ease, border-color .12s ease;
 }
-
+.smallBtn{
+  padding:6px 9px;
+  font-size:12px;
+  border-radius:10px;
+  box-shadow:none;
+}
 .btn:hover{transform:translateY(-1px);border-color:var(--accent)}
 .btn:active{transform:translateY(0)}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
@@ -367,11 +372,10 @@ body, .die, .die *{
 
   <div class="controls" id="controls">
     <label>Velikost:
-      <input id="dieSize" max="140" min="40" step="2" type="range"/>
-      <span id="dieSizeVal"></span>
-    </label>
-    <span style="font-size:13px;color:var(--muted);">(Dvojklik do hrací plochy = celá obrazovka)</span>
-  </div>
+     <input id="dieSize" max="90" min="32" step="2" type="range"/>
+<button id="resetSizeBtn" class="btn smallBtn" type="button">Reset</button>
+          </label>
+     </div>
 
   <div class="board" id="board">
     <div class="hint">Přetahuj prstem a skládej slova. Dvojklik na celek = zamknout/odemknout.</div>
@@ -464,6 +468,7 @@ const board = document.getElementById("board");
 const seedBox = document.getElementById("seedBox");
 const dieSizeInput = document.getElementById("dieSize");
 const dieSizeVal = document.getElementById("dieSizeVal");
+const resetSizeBtn = document.getElementById("resetSizeBtn");
 const rulesBtn   = document.getElementById("rulesBtn");
 const rulesModal = document.getElementById("rulesModal");
 const rulesClose = document.getElementById("rulesClose");
@@ -788,19 +793,35 @@ function newGame(customSeed=generateSeed()){
 }
 
 /* ==== velikost ==== */
+function setDieSize(side){
+  document.documentElement.style.setProperty("--die", side + "px");
+  document.documentElement.style.setProperty("--fsize", (side * 0.6) + "px");
+  dieSizeInput.value = side;
+}
+
 function syncSizes(){
   const side=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--die"),10);
   dieSizeInput.value=side;
-  dieSizeVal.textContent=side+" px";
 }
 dieSizeInput.addEventListener("input", e=>{
-  document.documentElement.style.setProperty("--die", e.target.value+"px");
-  document.documentElement.style.setProperty("--fsize", (e.target.value*0.6)+"px");
+  setDieSize(Number(e.target.value));
+});
+
+resetSizeBtn.addEventListener("click", ()=>{
+  setDieSize(50);
 });
 
 /* ==== fullscreen ==== */
 board.addEventListener("dblclick", ()=> document.body.classList.toggle("fullscreen"));
-
+seedBox.addEventListener("focus", ()=>{
+  requestAnimationFrame(()=>{
+    const range = document.createRange();
+    range.selectNodeContents(seedBox);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+});
 /* ==== seed editace ==== */
 seedBox.addEventListener("blur", ()=>{
   const val = seedBox.textContent.replace(/[^A-Z0-9]/gi,"").toUpperCase().slice(0,7);
