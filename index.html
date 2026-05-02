@@ -6,6 +6,7 @@
 <title>Skládání slov</title>
 <meta content="#0f1722" name="theme-color" id="themeColor"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <link href="./icons/icon-192.png" rel="apple-touch-icon"/>
 <link href="./manifest.webmanifest" rel="manifest"/>
@@ -127,18 +128,20 @@ body.fullscreen .board{
   box-shadow:var(--softShadow);
   transition:transform .12s ease, background .12s ease, border-color .12s ease;
 }
+
 .smallBtn{
   padding:6px 9px;
   font-size:12px;
   border-radius:10px;
   box-shadow:none;
 }
+
 .btn:hover{transform:translateY(-1px);border-color:var(--accent)}
 .btn:active{transform:translateY(0)}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
 
 .code-box{
-  margin-left:auto;
+  margin-left:0;
   background:linear-gradient(180deg,var(--btn),var(--btn2));
   border:1px solid var(--line);
   padding:9px 13px;
@@ -327,7 +330,7 @@ body, .die, .die *{
   min-width:0;
 }
 
-.bottom-left{justify-content:flex-start}
+.bottom-left{justify-content:flex-start;gap:8px}
 .bottom-center{justify-content:center;gap:8px}
 .bottom-right{justify-content:flex-end}
 
@@ -344,19 +347,22 @@ body, .die, .die *{
   letter-spacing:.4px;
 }
 
-#scoreBox{
+#scoreToggle{
   font-size:13px;
-  color:var(--muted);
   white-space:nowrap;
+}
+
+.scoreBtn{
+  min-width:92px;
 }
 
 @media (max-width:560px){
   .topbar{gap:8px}
   .btn{padding:9px 11px}
-    .code-box{order:0;margin-left:0;width:auto;min-width:110px}
+  .code-box{order:0;margin-left:0;width:auto;min-width:110px}
   .bottomBar{gap:6px;padding-left:8px;padding-right:8px}
   .bottomBar .btn{padding:8px 9px;font-size:13px}
-  #scoreBox{font-size:12px}
+  #scoreToggle{font-size:12px}
 }
 </style>
 </head>
@@ -366,16 +372,15 @@ body, .die, .die *{
   <div class="topbar">
     <button class="btn" id="rulesBtn">Pravidla</button>
     <button class="btn" id="themeBtn">Režim: tmavý</button>
-    <button class="btn" id="scoreToggle">Počítání bodů: ✔</button>
     <div class="code-box" contenteditable="true" id="seedBox" title="Klikni a uprav kód"></div>
   </div>
 
   <div class="controls" id="controls">
     <label>Velikost:
-     <input id="dieSize" max="90" min="32" step="2" type="range"/>
-<button id="resetSizeBtn" class="btn smallBtn" type="button">Reset</button>
-          </label>
-     </div>
+      <input id="dieSize" max="90" min="32" step="2" type="range"/>
+      <button id="resetSizeBtn" class="btn smallBtn" type="button">Reset</button>
+    </label>
+  </div>
 
   <div class="board" id="board">
     <div class="hint">Přetahuj prstem a skládej slova. Dvojklik na celek = zamknout/odemknout.</div>
@@ -411,15 +416,15 @@ body, .die, .die *{
 <div class="bottomBar">
   <div class="bottom-left">
     <button id="timerBtn" class="btn">5:00</button>
+    <button id="timerStartBtn" class="btn">Start</button>
   </div>
 
   <div class="bottom-center">
-    <button id="timerStartBtn" class="btn">Start</button>
-  <button id="checkWordBtn" class="btn">Ověřit&nbsp;slovo</button>
+    <button id="checkWordBtn" class="btn">Ověřit&nbsp;slovo</button>
   </div>
 
   <div class="bottom-right">
-    <div id="scoreBox">Skóre: 0</div>
+    <button id="scoreToggle" class="btn scoreBtn">Skóre: 0</button>
   </div>
 </div>
 
@@ -467,7 +472,6 @@ const DICE_SETS_EN = [
 const board = document.getElementById("board");
 const seedBox = document.getElementById("seedBox");
 const dieSizeInput = document.getElementById("dieSize");
-const dieSizeVal = document.getElementById("dieSizeVal");
 const resetSizeBtn = document.getElementById("resetSizeBtn");
 const rulesBtn   = document.getElementById("rulesBtn");
 const rulesModal = document.getElementById("rulesModal");
@@ -479,7 +483,6 @@ const themeColor = document.getElementById("themeColor");
 /* ==== stav ==== */
 let dice=[], seed=generateSeed();
 let language = localStorage.getItem("worddice_lang") || "CZ";
-  let scoreEnabled = true;
 
 /* Dřevěný styl je nově výchozí. Pokud uživatel nemá nic uložené, zapne se. */
 let wooden = localStorage.getItem("worddice_wood");
@@ -809,10 +812,12 @@ dieSizeInput.addEventListener("input", e=>{
 
 resetSizeBtn.addEventListener("click", ()=>{
   setDieSize(50);
+  arrangeGrid();
 });
 
 /* ==== fullscreen ==== */
 board.addEventListener("dblclick", ()=> document.body.classList.toggle("fullscreen"));
+
 seedBox.addEventListener("focus", ()=>{
   requestAnimationFrame(()=>{
     const range = document.createRange();
@@ -822,6 +827,7 @@ seedBox.addEventListener("focus", ()=>{
     sel.addRange(range);
   });
 });
+
 /* ==== seed editace ==== */
 seedBox.addEventListener("blur", ()=>{
   const val = seedBox.textContent.replace(/[^A-Z0-9]/gi,"").toUpperCase().slice(0,7);
@@ -862,7 +868,6 @@ newGame(seed);
 applyStyle();
 updateLangBtn();
 
-
 window.addEventListener("resize", ()=>{});
 window.addEventListener("pointerup", (e)=>{
   if(activePointers.has(e.pointerId)) unregisterPointer(e.pointerId);
@@ -893,16 +898,17 @@ window.addEventListener("keydown", (e)=>{
   }
 });
 
-/* ==== skóre - defaultně vypnuté ==== */
-const scoreBox = document.getElementById("scoreBox");
+/* ==== skóre - defaultně zapnuté ==== */
+let scoreEnabled = true;
 const scoreToggle = document.getElementById("scoreToggle");
-  computeScore();
 
 scoreToggle.addEventListener("click", ()=>{
   scoreEnabled = !scoreEnabled;
-  scoreToggle.textContent = "Počítání bodů: " + (scoreEnabled ? "✔" : "✖");
-  if(!scoreEnabled) scoreBox.textContent = "Skóre: 0";
-  else computeScore();
+  if(!scoreEnabled){
+    scoreToggle.textContent = "Skóre: ✖";
+  } else {
+    computeScore();
+  }
 });
 
 function computeScore(){
@@ -943,8 +949,10 @@ function computeScore(){
     else sum += val;
   }
 
-  scoreBox.textContent = "Skóre: " + sum;
+  scoreToggle.textContent = "Skóre: " + sum;
 }
+
+computeScore();
 
 /* ==== TIMER ==== */
 let timerSeconds = 300;
