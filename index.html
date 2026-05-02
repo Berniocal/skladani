@@ -1,231 +1,433 @@
 <!DOCTYPE html>
-
 <html lang="cs">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>Skládání slov</title>
-<meta content="#0f1722" name="theme-color"/>
+<meta content="#0f1722" name="theme-color" id="themeColor"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <link href="./icons/icon-192.png" rel="apple-touch-icon"/>
 <link href="./manifest.webmanifest" rel="manifest"/>
+<link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./icons/icon-192.png">
+
 <style>
 :root{
-  --die: 50px; --fsize: 30px; --gap: 12px; --pad: 8px;
-  --bg:#0f1722; --panel:#111827; --text:#e6eef8; --muted:#9fb0c7; --accent:#60a5fa;
-  --board:#0b1220; --shadow:0 10px 30px rgba(0,0,0,.35);
+  --die: 50px;
+  --fsize: 30px;
+  --pad: 8px;
+
+  --bg1:#0a1223;
+  --bg2:#101a2b;
+  --panel:rgba(17,24,39,.78);
+  --panel2:rgba(13,26,42,.78);
+  --board1:#0b1220;
+  --board2:#0e1a2f;
+  --text:#e6eef8;
+  --muted:#9fb0c7;
+  --line:#26384f;
+  --btn:#1f2937;
+  --btn2:#253044;
+  --accent:#60a5fa;
+  --accent2:#93c5fd;
+  --danger:#ff6b6b;
+  --shadow:0 18px 50px rgba(0,0,0,.38);
+  --softShadow:0 10px 30px rgba(0,0,0,.22);
+  --glass:blur(16px);
 }
+
+body.light{
+  --bg1:#f6f1e8;
+  --bg2:#eaf1f5;
+  --panel:rgba(255,255,255,.74);
+  --panel2:rgba(255,255,255,.70);
+  --board1:#f7fafc;
+  --board2:#eef4f8;
+  --text:#132033;
+  --muted:#5d6b7c;
+  --line:#d6dee8;
+  --btn:#ffffff;
+  --btn2:#f2f6fb;
+  --accent:#2563eb;
+  --accent2:#3b82f6;
+  --shadow:0 20px 50px rgba(29,45,68,.16);
+  --softShadow:0 10px 24px rgba(29,45,68,.12);
+}
+
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:linear-gradient(180deg,#0a1223,#0f1722);color:var(--text);font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif;overflow:hidden}
-body.fullscreen .topbar,body.fullscreen .controls,body.fullscreen .footer{display:none}
-body.fullscreen .board{height:100vh !important;transition:height .2s ease}
-.app{display:grid;grid-template-rows:auto auto 1fr auto;gap:12px;min-height:100vh;padding:12px}
-.topbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.btn{background:#1f2937;border:1px solid #2b3a51;color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;user-select:none;box-shadow:var(--shadow)}
-.btn:hover{background:#253044}
+
+html,body{
+  height:100%;
+  margin:0;
+  color:var(--text);
+  font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at top left, rgba(96,165,250,.22), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(180,122,54,.18), transparent 32%),
+    linear-gradient(180deg,var(--bg1),var(--bg2));
+}
+
+body.light{
+  background:
+    radial-gradient(circle at top left, rgba(37,99,235,.13), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(180,122,54,.20), transparent 32%),
+    linear-gradient(180deg,var(--bg1),var(--bg2));
+}
+
+button,input{font:inherit}
+
+body.fullscreen .topbar,
+body.fullscreen .controls{
+  display:none;
+}
+
+body.fullscreen .app{
+  padding:0 0 56px 0;
+}
+
+body.fullscreen .board{
+  height:calc(100vh - 56px) !important;
+  min-height:calc(100vh - 56px) !important;
+  border-radius:0;
+  border-left:0;
+  border-right:0;
+}
+
+.app{
+  display:grid;
+  grid-template-rows:auto auto 1fr;
+  gap:12px;
+  min-height:100vh;
+  padding:12px 12px 64px;
+}
+
+.topbar{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:10px;
+  box-shadow:var(--softShadow);
+  backdrop-filter:var(--glass);
+}
+
+.btn{
+  background:linear-gradient(180deg,var(--btn),var(--btn2));
+  border:1px solid var(--line);
+  color:var(--text);
+  padding:10px 14px;
+  border-radius:14px;
+  cursor:pointer;
+  user-select:none;
+  box-shadow:var(--softShadow);
+  transition:transform .12s ease, background .12s ease, border-color .12s ease;
+}
+
+.btn:hover{transform:translateY(-1px);border-color:var(--accent)}
+.btn:active{transform:translateY(0)}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
-.code-box{margin-left:auto;background:#1f2937;border:1px solid #2b3a51;padding:8px 12px;border-radius:12px;font-weight:600;letter-spacing:2px;cursor:text;min-width:90px;text-align:center}
-.code-box:focus{outline:2px solid var(--accent)}
-.controls{display:flex;gap:14px;flex-wrap:wrap;align-items:center;background:#0d1a2a;border:1px solid #203046;border-radius:12px;padding:8px 12px}
-.controls label{font-size:14px;color:#c9d4e6}
-.controls input[type="range"]{width:180px}
-.board{position:relative;background:linear-gradient(180deg,#0b1220,#0c1527);border:1px solid #1f2a3b;border-radius:16px;box-shadow:var(--shadow);overflow:hidden;min-height:60vh}
-.hint{position:absolute;inset:10px auto auto 10px;color:#9fb0c780;font-size:14px;pointer-events:none}
+
+.code-box{
+  margin-left:auto;
+  background:linear-gradient(180deg,var(--btn),var(--btn2));
+  border:1px solid var(--line);
+  padding:9px 13px;
+  border-radius:14px;
+  font-weight:800;
+  letter-spacing:2px;
+  cursor:text;
+  min-width:98px;
+  text-align:center;
+  box-shadow:var(--softShadow);
+}
+.code-box:focus{outline:3px solid color-mix(in srgb, var(--accent) 45%, transparent)}
+
+.controls{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  align-items:center;
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:10px 12px;
+  box-shadow:var(--softShadow);
+  backdrop-filter:var(--glass);
+}
+.controls label{font-size:14px;color:var(--muted)}
+.controls input[type="range"]{width:180px;accent-color:var(--accent)}
+
+.board{
+  position:relative;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--board1) 92%, transparent), color-mix(in srgb, var(--board2) 96%, transparent));
+  border:1px solid var(--line);
+  border-radius:24px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  min-height:60vh;
+}
+
+.hint{
+  position:absolute;
+  inset:12px auto auto 12px;
+  color:color-mix(in srgb, var(--muted) 70%, transparent);
+  font-size:14px;
+  pointer-events:none;
+}
+
 .die{
-  position:absolute;width:var(--die);height:var(--die);border-radius:14px;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:700;font-size:var(--fsize);line-height:1;
-  border:2px solid rgba(0,0,0,.35);box-shadow:0 8px 24px rgba(0,0,0,.45);
-  touch-action:none;transform:translate3d(0,0,0);padding:var(--pad);
-  background:#3a4455; transition:background .15s;
+  position:absolute;
+  width:var(--die);
+  height:var(--die);
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:850;
+  font-size:var(--fsize);
+  line-height:1;
+  border:1px solid rgba(0,0,0,.28);
+  box-shadow:0 10px 22px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.35);
+  touch-action:none;
+  transform:translate3d(0,0,0);
+  padding:var(--pad);
+  background:#3a4455;
+  transition:background .15s, box-shadow .15s, transform .15s;
 }
 .die .face{display:flex;align-items:flex-end;gap:6px;white-space:nowrap}
-.die sub{font-size:.48em;line-height:1;position:relative;bottom:-.1em;opacity:.9}
+.die sub{font-size:.48em;line-height:1;position:relative;bottom:-.1em;opacity:.86}
 
-/* Zákaz označování textu (písmen/čísel) – aby to nekazilo drag */
 body, .die, .die *{
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none; /* iOS: vypne "kopírovat" bublinu */
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
 }
-.die.dragging{outline:3px solid rgba(255,255,255,.25)}
-.footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px;color:#9fb0c7}
 
+.die.dragging{
+  outline:3px solid rgba(255,255,255,.30);
+  transform:scale(1.03);
+}
 
 .die.wood{
-  background-image:url("./icons/wood-texture.jpg"); /* ulož sem svou texturu */
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,.26), transparent 24%),
+    linear-gradient(135deg,#c99a5b,#8b5a2b 48%,#d6a86b);
+  background-image:url("./icons/wood-texture.jpg");
   background-size:cover;
   background-position:center;
-  color:#111;
-  border:1px solid #0003;
+  color:#14100b;
+  text-shadow:0 1px 0 rgba(255,255,255,.25);
+  border:1px solid rgba(63,36,13,.42);
 }
 
-/* Zamknutý celek – vizuální zvýraznění */
 .die.selected{
-  outline:3px solid #3b82f6;
-  box-shadow:0 0 0 4px rgba(59,130,246,.25), 0 8px 24px rgba(0,0,0,.45);
+  outline:3px solid var(--accent);
+  box-shadow:0 0 0 5px color-mix(in srgb, var(--accent) 25%, transparent), 0 12px 28px rgba(0,0,0,.34);
 }
 
-/* Modal s pravidly */
 .modal{
-  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
-  background:rgba(0,0,0,.55); z-index:9999; padding:16px;
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.55);
+  z-index:9999;
+  padding:16px;
 }
 .modal.open{display:flex}
 .modal-card{
-  width:min(100%, 960px); height:min(100%, 90vh);
-  background:#0d1a2a; border:1px solid #203046; border-radius:14px; box-shadow:var(--shadow);
-  display:flex; flex-direction:column; overflow:hidden;
+  width:min(100%, 960px);
+  height:min(100%, 90vh);
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:20px;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  backdrop-filter:var(--glass);
 }
 .modal-head{
-  display:flex; align-items:center; gap:12px; padding:10px 12px; border-bottom:1px solid #203046;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  border-bottom:1px solid var(--line);
 }
-.modal-head h3{margin:0; font-size:16px; color:#cfe0ff}
+.modal-head h3{margin:0;font-size:17px;color:var(--text)}
 .modal-head .spacer{flex:1}
 .modal-close{
-  background:#1f2937; border:1px solid #2b3a51; color:#e6eef8; border-radius:10px; padding:6px 10px; cursor:pointer;
+  background:var(--btn);
+  border:1px solid var(--line);
+  color:var(--text);
+  border-radius:12px;
+  padding:7px 11px;
+  cursor:pointer;
 }
-.modal-body{flex:1; background:#0b1220; padding:14px; overflow:auto}
-.modal-body h4{margin:10px 0 6px 0; font-size:14px; color:#cfe0ff}
-.modal-body p, .modal-body li{color:#c9d4e6; font-size:14px; line-height:1.45}
+.modal-body{flex:1;background:color-mix(in srgb, var(--board1) 86%, transparent);padding:16px;overflow:auto}
+.modal-body h4{margin:10px 0 6px 0;font-size:15px;color:var(--text)}
+.modal-body p,.modal-body li{color:var(--text);font-size:14px;line-height:1.48}
 .modal-body ul{margin:6px 0 12px 18px}
-.smallnote{color:#9fb0c7; font-size:12px; margin-top:10px; opacity:.95}
-.scoreBox{position:absolute;right:10px;bottom:10px;font-size:12px;color:#c9d4e6;opacity:.9;}
+.smallnote{color:var(--muted);font-size:12px;margin-top:10px;opacity:.95}
+
+#timeUpMsg{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:28px;
+  font-weight:800;
+  color:var(--danger);
+  display:none;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:18px;
+  padding:18px 24px;
+  backdrop-filter:blur(10px);
+}
 
 /* ==== SPODNÍ LIŠTA ==== */
 .bottomBar{
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 6px 12px;
-  background: rgba(15, 23, 34, 0.95);
-  border-top: 1px solid #2b3a51;
-
-  z-index: 2000;
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:8px 12px max(8px, env(safe-area-inset-bottom));
+  background:color-mix(in srgb, var(--panel) 92%, transparent);
+  border-top:1px solid var(--line);
+  z-index:2000;
+  box-shadow:0 -10px 30px rgba(0,0,0,.18);
+  backdrop-filter:var(--glass);
 }
 
 .bottom-left,
 .bottom-center,
 .bottom-right{
-  flex: 1;
-  display: flex;
-  align-items: center;
+  flex:1;
+  display:flex;
+  align-items:center;
+  min-width:0;
 }
 
-.bottom-left{ justify-content: flex-start; }
-.bottom-center{ justify-content: center; }
-.bottom-right{ justify-content: flex-end; }
+.bottom-left{justify-content:flex-start}
+.bottom-center{justify-content:center;gap:8px}
+.bottom-right{justify-content:flex-end}
 
 .bottomBar .btn{
-  padding: 6px 10px;
-  font-size: 14px;
+  padding:8px 14px;
+  font-size:14px;
+  border-radius:13px;
+  white-space:nowrap;
 }
 
-.bottomBar #scoreBox{
-  position: static;
-  font-size: 13px;
+#timerBtn{
+  min-width:72px;
+  font-weight:850;
+  letter-spacing:.4px;
 }
 
-.bottomBar #timerDisplay{
-  position: static;
-  font-size: 14px;
+#scoreBox{
+  font-size:13px;
+  color:var(--muted);
+  white-space:nowrap;
 }
 
-
-
+@media (max-width:560px){
+  .topbar{gap:8px}
+  .btn{padding:9px 11px}
+  .code-box{order:10;margin-left:0;width:100%}
+  .bottomBar{gap:6px;padding-left:8px;padding-right:8px}
+  .bottomBar .btn{padding:8px 9px;font-size:13px}
+  #scoreBox{font-size:12px}
+}
 </style>
-    <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-192.png">
-<link rel="icon" type="image/png" sizes="16x16" href="./icons/icon-192.png">
 </head>
+
 <body>
 <div class="app">
-<div class="topbar">
-<button class="btn" id="newGameBtn">Nová hra</button>
-<button class="btn" id="rulesBtn">Pravidla</button>
-<button class="btn" id="styleBtn">Styl: moderní</button>
-<button class="btn" id="scoreToggle">Počítání bodů: ✖</button>
-<!-- <button id="langBtn"    class="btn">Jazyk: CZ</button> -->
-<div class="code-box" contenteditable="true" id="seedBox" title="Klikni a uprav kód"></div>
-</div>
-<div class="controls" id="controls">
+  <div class="topbar">
+    <button class="btn" id="rulesBtn">Pravidla</button>
+    <button class="btn" id="themeBtn">Režim: tmavý</button>
+    <button class="btn" id="scoreToggle">Počítání bodů: ✔</button>
+    <div class="code-box" contenteditable="true" id="seedBox" title="Klikni a uprav kód"></div>
+  </div>
 
-<button id="timerBtn" class="btn">0:00</button>
-<button id="timerStartBtn" class="btn">Start</button>
-<label>Velikost:
+  <div class="controls" id="controls">
+    <label>Velikost:
       <input id="dieSize" max="140" min="40" step="2" type="range"/>
-<span id="dieSizeVal"></span>
-</label>
-<span style="font-size:13px;color:#9fb0c7;">(Dvojklik do hrací plochy = celá obrazovka)</span>
-</div>
-<div class="board" id="board">
-<div class="hint">Přetahuj prstem a skládej slova. Dvojklik na celek = zamknout/odemknout.</div>
+      <span id="dieSizeVal"></span>
+    </label>
+    <span style="font-size:13px;color:var(--muted);">(Dvojklik do hrací plochy = celá obrazovka)</span>
+  </div>
 
-<div id="timeUpMsg" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;color:#ff6b6b;display:none;">Čas vypršel</div>
+  <div class="board" id="board">
+    <div class="hint">Přetahuj prstem a skládej slova. Dvojklik na celek = zamknout/odemknout.</div>
+    <div id="timeUpMsg">Čas vypršel</div>
+  </div>
 </div>
 
-</div>
 <!-- Modal Pravidla -->
 <div aria-hidden="true" aria-modal="true" class="modal" id="rulesModal" role="dialog">
-<div class="modal-card">
-<div class="modal-head">
-<h3>Pravidla hry</h3>
-<div class="spacer"></div>
-<button aria-label="Zavřít" class="modal-close" id="rulesClose">Zavřít</button>
-</div>
-<div class="modal-body">
-<h4>Cíl</h4>
-<p>Skládej slova přikládáním písmenek tak, aby na sebe navazovaly (zleva doprava / shora dolů). Písmenka můžeš libovolně přesouvat a přeskupovat.</p>
-<h4>Ovládání</h4>
-<ul>
-<li>Táhni písmenko prstem/myší.</li>
-<li>Písmenka se při přiblížení automaticky „přichytí“ k sousedům.</li>
-<li>Dvojklik na propojený celek: zamknout/odemknout celek (pak táhneš celek).</li>
-<li>Dvojklik do hrací plochy: přepnutí na celou obrazovku.</li>
-</ul>
-<h4>Seed / kód</h4>
-<p>7místný kód (A–Z, 0–9) sjednotí náhodu: když zadáte stejný kód, všichni uvidí stejné rozložení.</p>
-<p class="smallnote">
-        Pozn.: Tohle jsou pravidla této webové aplikace (ovládání a sdílení rozložení).
-      </p>
-</div>
-</div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3>Pravidla hry</h3>
+      <div class="spacer"></div>
+      <button aria-label="Zavřít" class="modal-close" id="rulesClose">Zavřít</button>
+    </div>
+    <div class="modal-body">
+      <h4>Cíl</h4>
+      <p>Skládej slova přikládáním písmenek tak, aby na sebe navazovaly zleva doprava nebo shora dolů. Písmenka můžeš libovolně přesouvat a přeskupovat.</p>
+      <h4>Ovládání</h4>
+      <ul>
+        <li>Táhni písmenko prstem nebo myší.</li>
+        <li>Písmenka se při přiblížení automaticky „přichytí“ k sousedům.</li>
+        <li>Dvojklik na propojený celek: zamknout nebo odemknout celek.</li>
+        <li>Dvojklik do hrací plochy: přepnutí na celou obrazovku.</li>
+      </ul>
+      <h4>Seed / kód</h4>
+      <p>7místný kód A–Z a 0–9 sjednotí náhodu: když zadáte stejný kód, všichni uvidí stejné rozložení.</p>
+      <p class="smallnote">Pozn.: Tohle jsou pravidla této webové aplikace.</p>
+    </div>
+  </div>
 </div>
 
 <div class="bottomBar">
-
   <div class="bottom-left">
-    <div id="timerDisplay">5:00</div>
+    <button id="timerBtn" class="btn">5:00</button>
   </div>
 
   <div class="bottom-center">
-    <button id="checkWordBtn" class="btn">Ověřit slovo</button>
+    <button id="timerStartBtn" class="btn">Start</button>
+  <button id="checkWordBtn" class="btn">Ověřit&nbsp;slovo</button>
   </div>
 
   <div class="bottom-right">
     <div id="scoreBox">Skóre: 0</div>
   </div>
-
 </div>
 
-</div>
 <script>
 "use strict";
 
 /* ==== konfigurace ==== */
-const SNAP_THRESH = 14; // vzdálenost, kdy začít uvažovat snap
-const SNAP_GAP    = 1;  // mezera po přichycení
+const SNAP_THRESH = 14;
+const SNAP_GAP    = 1;
 const CONNECT_EPS = 1.5;
 
-/* ==== CZ sada (původní) ==== */
+/* ==== CZ sada ==== */
 const DICE_SETS = [
   [ {sym:"Z",val:2}, {sym:"K",val:2}, {sym:"H",val:2}, {sym:"Ch",val:2}, {sym:"D",val:2}, {sym:"R",val:2} ],
   [ {sym:"M",val:2}, {sym:"L",val:2}, {sym:"B",val:2}, {sym:"S",val:2}, {sym:"V",val:2}, {sym:"P",val:2} ],
@@ -241,16 +443,13 @@ const DICE_SETS = [
   [ {sym:"Ť",val:5}, {sym:"Ď",val:5}, {sym:"C",val:2}, {sym:":-)",val:null}, {sym:"J",val:2}, {sym:"Ň",val:5} ],
 ];
 
-/* ==== EN sada (podle tvého rozložení a hodnot) ==== */
+/* ==== EN sada ==== */
 const DICE_SETS_EN = [
- 
   [ {sym:"E",val:1}, {sym:"A",val:1}, {sym:"I",val:1}, {sym:"O",val:1}, {sym:"U",val:2}, {sym:"E",val:1} ],
   [ {sym:"E",val:1}, {sym:"A",val:1}, {sym:"I",val:1}, {sym:"O",val:1}, {sym:"A",val:1}, {sym:"E",val:1} ],
   [ {sym:"E",val:1}, {sym:"A",val:1}, {sym:"I",val:1}, {sym:"O",val:1}, {sym:"U",val:2}, {sym:"I",val:1} ],
   [ {sym:"E",val:1}, {sym:"O",val:1}, {sym:"U",val:2}, {sym:"A",val:1}, {sym:"I",val:1}, {sym:"O",val:1} ],
   [ {sym:"E",val:1}, {sym:"E",val:1}, {sym:"A",val:1}, {sym:"O",val:1}, {sym:"I",val:1}, {sym:"U",val:2} ],
-
-
   [ {sym:"T",val:2}, {sym:"R",val:2}, {sym:"L",val:2}, {sym:"S",val:2}, {sym:"N",val:2}, {sym:"D",val:2} ],
   [ {sym:"R",val:2}, {sym:"T",val:2}, {sym:"N",val:2}, {sym:"H",val:2}, {sym:"C",val:2}, {sym:"P",val:2} ],
   [ {sym:"M",val:2}, {sym:"B",val:2}, {sym:"G",val:3}, {sym:"Y",val:2}, {sym:"V",val:3}, {sym:"W",val:3} ],
@@ -265,20 +464,39 @@ const board = document.getElementById("board");
 const seedBox = document.getElementById("seedBox");
 const dieSizeInput = document.getElementById("dieSize");
 const dieSizeVal = document.getElementById("dieSizeVal");
-const newGameBtn = document.getElementById("newGameBtn");
 const rulesBtn   = document.getElementById("rulesBtn");
 const rulesModal = document.getElementById("rulesModal");
 const rulesClose = document.getElementById("rulesClose");
-const styleBtn   = document.getElementById("styleBtn");
 const langBtn    = document.getElementById("langBtn");
+const themeBtn   = document.getElementById("themeBtn");
+const themeColor = document.getElementById("themeColor");
 
 /* ==== stav ==== */
 let dice=[], seed=generateSeed();
 let language = localStorage.getItem("worddice_lang") || "CZ";
 
-/* ==== výběr (zamknutý celek) ==== */
-let selected = new Set();       
-let clusterLocked = false;      // režim zamknutého celku
+/* Dřevěný styl je nově výchozí. Pokud uživatel nemá nic uložené, zapne se. */
+let wooden = localStorage.getItem("worddice_wood");
+wooden = wooden === null ? true : wooden === "1";
+
+/* ==== světlý/tmavý režim ==== */
+let theme = localStorage.getItem("worddice_theme") || "dark";
+
+function applyTheme(){
+  document.body.classList.toggle("light", theme === "light");
+  themeBtn.textContent = theme === "light" ? "Režim: světlý" : "Režim: tmavý";
+  themeColor.setAttribute("content", theme === "light" ? "#f6f1e8" : "#0f1722");
+}
+
+themeBtn.addEventListener("click", ()=>{
+  theme = theme === "light" ? "dark" : "light";
+  localStorage.setItem("worddice_theme", theme);
+  applyTheme();
+});
+
+/* ==== výběr ==== */
+let selected = new Set();
+let clusterLocked = false;
 
 function applySelectionStyles(){
   dice.forEach(d => d.el.classList.toggle("selected", selected.has(d)));
@@ -287,7 +505,6 @@ function clearSelection(){
   selected.clear();
   clusterLocked = false;
   applySelectionStyles();
-  // ukonči případný klastrový přesun
   clusterDrag.active = false;
   clusterDrag.dies = [];
   clusterDrag.pointers.clear();
@@ -309,12 +526,45 @@ function maybeAddToSelectionAfterSnap(active){
 }
 
 /* ==== pomocné ==== */
-function generateSeed(){const s="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";let o="";for(let i=0;i<7;i++)o+=s[Math.floor(Math.random()*s.length)];return o;}
-function rngFromSeed(seed){let h=0;for(let i=0;i<seed.length;i++){h=(h*37+seed.charCodeAt(i))>>>0;}return()=>{h=(h*1664525+1013904223)>>>0;return(h>>>0)/4294967296;};}
-function faceHTML(f){return f.val==null?`<div class="face"><span>${f.sym}</span></div>`:`<div class="face"><span>${f.sym}</span><sub>${f.val}</sub></div>`;}
-function moveDieTo(state,x,y,clamp=true){const b=board.getBoundingClientRect();const r=state.el.getBoundingClientRect();let nx=x-b.left,ny=y-b.top;if(clamp){nx=Math.max(6,Math.min(nx,b.width-r.width-6));ny=Math.max(6,Math.min(ny,b.height-r.height-6));}state.x=nx;state.y=ny;state.el.style.left=nx+"px";state.el.style.top=ny+"px";}
-function dieRect(s){const side=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--die"),10);return {left:s.x,top:s.y,right:s.x+side,bottom:s.y+side,side};}
-function overlap(a1,a2,b1,b2){return Math.max(0,Math.min(a2,b2)-Math.max(a1,b1));}
+function generateSeed(){
+  const s="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let o="";
+  for(let i=0;i<7;i++) o+=s[Math.floor(Math.random()*s.length)];
+  return o;
+}
+function rngFromSeed(seed){
+  let h=0;
+  for(let i=0;i<seed.length;i++){h=(h*37+seed.charCodeAt(i))>>>0;}
+  return()=>{
+    h=(h*1664525+1013904223)>>>0;
+    return(h>>>0)/4294967296;
+  };
+}
+function faceHTML(f){
+  return f.val==null
+    ? `<div class="face"><span>${f.sym}</span></div>`
+    : `<div class="face"><span>${f.sym}</span><sub>${f.val}</sub></div>`;
+}
+function moveDieTo(state,x,y,clamp=true){
+  const b=board.getBoundingClientRect();
+  const r=state.el.getBoundingClientRect();
+  let nx=x-b.left, ny=y-b.top;
+  if(clamp){
+    nx=Math.max(6,Math.min(nx,b.width-r.width-6));
+    ny=Math.max(6,Math.min(ny,b.height-r.height-6));
+  }
+  state.x=nx;
+  state.y=ny;
+  state.el.style.left=nx+"px";
+  state.el.style.top=ny+"px";
+}
+function dieRect(s){
+  const side=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--die"),10);
+  return {left:s.x,top:s.y,right:s.x+side,bottom:s.y+side,side};
+}
+function overlap(a1,a2,b1,b2){
+  return Math.max(0,Math.min(a2,b2)-Math.max(a1,b1));
+}
 function isAdjacent(a,b){
   const A=dieRect(a), B=dieRect(b), need=A.side*0.5;
   const oX=overlap(A.left,A.right,B.left,B.right);
@@ -326,12 +576,16 @@ function isAdjacent(a,b){
   return false;
 }
 function getCluster(start){
-  const stack=[start]; const seen=new Set([start]);
+  const stack=[start];
+  const seen=new Set([start]);
   while(stack.length){
     const cur=stack.pop();
     for(const n of dice){
       if(seen.has(n) || n===cur) continue;
-      if(isAdjacent(cur,n)||isAdjacent(n,cur)){ seen.add(n); stack.push(n); }
+      if(isAdjacent(cur,n)||isAdjacent(n,cur)){
+        seen.add(n);
+        stack.push(n);
+      }
     }
   }
   return Array.from(seen);
@@ -376,9 +630,13 @@ function attemptSnap(active){
 /* ==== multi-touch klastrový pohyb ==== */
 const activePointers = new Map();
 const clusterDrag = {active:false, dies:[], pointers:new Set()};
+
 function registerPointer(id, die, x, y){
   activePointers.set(id,{die,lastX:x,lastY:y});
-  if (clusterDrag.active){ clusterDrag.pointers.add(id); return; }
+  if (clusterDrag.active){
+    clusterDrag.pointers.add(id);
+    return;
+  }
   if (activePointers.size >= 2){
     const ids=[...activePointers.keys()];
     const a=activePointers.get(ids[0]).die;
@@ -388,39 +646,44 @@ function registerPointer(id, die, x, y){
       clusterDrag.active=true;
       clusterDrag.dies=cluster;
       clusterDrag.pointers=new Set(ids);
-      cluster.forEach(d=>{ d.dragging=false; d.el.classList.remove("dragging"); });
+      cluster.forEach(d=>{
+        d.dragging=false;
+        d.el.classList.remove("dragging");
+      });
     }
   }
 }
 function unregisterPointer(id){
   activePointers.delete(id);
   clusterDrag.pointers.delete(id);
-  if (activePointers.size === 0){ clusterDrag.active=false; clusterDrag.dies=[]; clusterDrag.pointers.clear(); }
+  if (activePointers.size === 0){
+    clusterDrag.active=false;
+    clusterDrag.dies=[];
+    clusterDrag.pointers.clear();
+  }
 }
 function clusterMove(e){
   const ap=activePointers.get(e.pointerId);
   if(!ap) return;
   const dx=e.clientX - ap.lastX;
   const dy=e.clientY - ap.lastY;
-  ap.lastX=e.clientX; ap.lastY=e.clientY;
+  ap.lastX=e.clientX;
+  ap.lastY=e.clientY;
   const b=board.getBoundingClientRect();
   for(const d of clusterDrag.dies) moveDieTo(d, b.left + d.x + dx, b.top + d.y + dy, true);
 }
 
-
 function createDie(i, rand, setData){
-  const el=document.createElement("div"); el.className="die";
+  const el=document.createElement("div");
+  el.className="die";
   const s={el,set:setData[i],faceIdx:Math.floor(rand()*6),x:0,y:0,dragging:false,pointerId:null,offX:0,offY:0};
   el.innerHTML=faceHTML(s.set[s.faceIdx]);
 
-  // DŘEVĚNÝ STYL (pokud je zapnut)
   if (wooden) el.classList.add("wood");
 
-  // Pointer down
   el.addEventListener("pointerdown",(e)=>{
     e.stopPropagation();
 
-    // Zamknutý celek: klik na člena => táhni celý klastr
     if (clusterLocked && selected.has(s)) {
       el.setPointerCapture(e.pointerId);
       registerPointer(e.pointerId, s, e.clientX, e.clientY);
@@ -431,53 +694,59 @@ function createDie(i, rand, setData){
       return;
     }
 
-    // Běžný individuální drag
-    s.dragging = true; s.pointerId = e.pointerId; el.setPointerCapture(e.pointerId);
-    const r = el.getBoundingClientRect(); s.offX = e.clientX - r.left; s.offY = e.clientY - r.top;
-    el.classList.add("dragging"); el.style.zIndex = String(1000 + Date.now()%10000);
+    s.dragging = true;
+    s.pointerId = e.pointerId;
+    el.setPointerCapture(e.pointerId);
+    const r = el.getBoundingClientRect();
+    s.offX = e.clientX - r.left;
+    s.offY = e.clientY - r.top;
+    el.classList.add("dragging");
+    el.style.zIndex = String(1000 + Date.now()%10000);
     registerPointer(e.pointerId, s, e.clientX, e.clientY);
   });
 
-  // Pointer move
   el.addEventListener("pointermove",(e)=>{
     if (clusterLocked && selected.has(s) && activePointers.has(e.pointerId)){
       clusterMove(e);
       return;
     }
-    if (clusterDrag.active && activePointers.has(e.pointerId)){ clusterMove(e); return; }
+    if (clusterDrag.active && activePointers.has(e.pointerId)){
+      clusterMove(e);
+      return;
+    }
     if (!s.dragging || e.pointerId !== s.pointerId) return;
     moveDieTo(s, e.clientX - s.offX, e.clientY - s.offY, true);
   });
 
-  // Pointer up
   el.addEventListener("pointerup",(e)=>{
-    // táhli jsme zamknutý celek -> jen ukonči pointer, bez snapů
     if (clusterLocked && selected.has(s) && activePointers.has(e.pointerId)) {
       unregisterPointer(e.pointerId);
       el.classList.remove("dragging");
+      computeScore();
       return;
     }
     if (clusterDrag.active && activePointers.has(e.pointerId)){
       unregisterPointer(e.pointerId);
       el.classList.remove("dragging");
+      computeScore();
       return;
     }
     if (s.dragging && e.pointerId === s.pointerId){
-      s.dragging = false; el.classList.remove("dragging");
+      s.dragging = false;
+      el.classList.remove("dragging");
       attemptSnap(s);
       computeScore();
-      maybeAddToSelectionAfterSnap(s); // v zamknutém režimu přibírej nové dílky po dosednutí
+      maybeAddToSelectionAfterSnap(s);
       unregisterPointer(e.pointerId);
     }
   });
 
-  // Dvojklik: zamknout/odemknout celek
   el.addEventListener("dblclick",(e)=>{
-    e.stopPropagation(); // nevyvolej fullscreen na boardu
+    e.stopPropagation();
     if (clusterLocked && selected.has(s)){
-      clearSelection();        // odemknout
+      clearSelection();
     } else {
-      selectClusterFrom(s);    // zamknout propojený klastr
+      selectClusterFrom(s);
     }
   });
 
@@ -489,11 +758,20 @@ function createDie(i, rand, setData){
 function arrangeGrid(){
   const b=board.getBoundingClientRect();
   const side=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--die"),10);
-  let cols=4;for(let c=6;c>=3;c--){if(2*10+c*side+(c-1)*12<=b.width){cols=c;break;}}
-  dice.forEach((d,i)=>{const r=Math.floor(i/cols),c=i%cols;moveDieTo(d,b.left+10+c*(side+12),b.top+10+r*(side+12),false);});
+  let cols=4;
+  for(let c=6;c>=3;c--){
+    if(2*10+c*side+(c-1)*12<=b.width){
+      cols=c;
+      break;
+    }
+  }
+  dice.forEach((d,i)=>{
+    const r=Math.floor(i/cols), c=i%cols;
+    moveDieTo(d,b.left+10+c*(side+12),b.top+10+r*(side+12),false);
+  });
 }
 
-/* ==== nová hra ==== */
+/* ==== nová hra přes seed/reload ==== */
 function newGame(customSeed=generateSeed()){
   clearSelection();
   seed = customSeed;
@@ -508,43 +786,40 @@ function newGame(customSeed=generateSeed()){
   requestAnimationFrame(arrangeGrid);
 }
 
-/* ==== posuvníky ==== */
+/* ==== velikost ==== */
 function syncSizes(){
   const side=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--die"),10);
-  dieSizeInput.value=side; dieSizeVal.textContent=side+" px";
+  dieSizeInput.value=side;
+  dieSizeVal.textContent=side+" px";
 }
 dieSizeInput.addEventListener("input", e=>{
   document.documentElement.style.setProperty("--die", e.target.value+"px");
   document.documentElement.style.setProperty("--fsize", (e.target.value*0.6)+"px");
 });
 
-/* ==== fullscreen (dvojklik do hrací plochy) ==== */
+/* ==== fullscreen ==== */
 board.addEventListener("dblclick", ()=> document.body.classList.toggle("fullscreen"));
 
 /* ==== seed editace ==== */
 seedBox.addEventListener("blur", ()=>{
   const val = seedBox.textContent.replace(/[^A-Z0-9]/gi,"").toUpperCase().slice(0,7);
-  if (val.length===7) newGame(val); else seedBox.textContent = seed;
+  if (val.length===7) newGame(val);
+  else seedBox.textContent = seed;
 });
 seedBox.addEventListener("keydown", e=>{
-  if (e.key === "Enter"){ e.preventDefault(); seedBox.blur(); }
+  if (e.key === "Enter"){
+    e.preventDefault();
+    seedBox.blur();
+  }
 });
 
-
-let wooden = localStorage.getItem("worddice_wood") === "1";
+/* ==== dřevěný styl - bez tlačítka, ale zachováno pro funkci ==== */
 function applyStyle(){
   dice.forEach(d => d.el.classList.toggle("wood", wooden));
-  if (styleBtn) styleBtn.textContent = wooden ? "Styl: dřevěný" : "Styl: moderní";
-}
-if (styleBtn){
-  styleBtn.addEventListener("click", () => {
-    wooden = !wooden;
-    localStorage.setItem("worddice_wood", wooden ? "1" : "0");
-    applyStyle();
-  });
+  localStorage.setItem("worddice_wood", wooden ? "1" : "0");
 }
 
-/* ==== Jazyk CZ/EN ==== */
+/* ==== Jazyk CZ/EN - tlačítko je teď skryté/odstraněné, funkce zůstává ==== */
 function updateLangBtn(){
   if (langBtn) langBtn.textContent = (language === "EN") ? "Jazyk: EN" : "Jazyk: CZ";
 }
@@ -553,26 +828,28 @@ if (langBtn){
     language = (language === "CZ") ? "EN" : "CZ";
     localStorage.setItem("worddice_lang", language);
     updateLangBtn();
-    newGame(seed); // přegeneruj se stejným seedem
+    newGame(seed);
     applyStyle();
   });
 }
 
 /* ==== Start ==== */
-newGameBtn.addEventListener("click", ()=> { newGame(); applyStyle(); });
+applyTheme();
 syncSizes();
 newGame(seed);
 applyStyle();
 updateLangBtn();
+computeScore();
 
-/* Ponecháme pozice i při změně orientace */
 window.addEventListener("resize", ()=>{});
+window.addEventListener("pointerup", (e)=>{
+  if(activePointers.has(e.pointerId)) unregisterPointer(e.pointerId);
+});
+window.addEventListener("pointercancel", (e)=>{
+  if(activePointers.has(e.pointerId)) unregisterPointer(e.pointerId);
+});
 
-/* Pojistky pro multitouch „klastr“ – konec až když nejsou žádné prsty */
-window.addEventListener("pointerup",    (e)=>{ if(activePointers.has(e.pointerId)) unregisterPointer(e.pointerId); });
-window.addEventListener("pointercancel", (e)=>{ if(activePointers.has(e.pointerId)) unregisterPointer(e.pointerId); });
-
-/* Ovládání modalu Pravidla */
+/* ==== modal Pravidla ==== */
 rulesBtn.addEventListener("click", ()=>{
   rulesModal.classList.add("open");
   rulesModal.setAttribute("aria-hidden","false");
@@ -594,7 +871,8 @@ window.addEventListener("keydown", (e)=>{
   }
 });
 
-let scoreEnabled = false;
+/* ==== skóre - defaultně vypnuté ==== */
+let scoreEnabled = true;
 const scoreBox = document.getElementById("scoreBox");
 const scoreToggle = document.getElementById("scoreToggle");
 
@@ -602,16 +880,8 @@ scoreToggle.addEventListener("click", ()=>{
   scoreEnabled = !scoreEnabled;
   scoreToggle.textContent = "Počítání bodů: " + (scoreEnabled ? "✔" : "✖");
   if(!scoreEnabled) scoreBox.textContent = "Skóre: 0";
+  else computeScore();
 });
-
-function countConnections(die){
-  let c = 0;
-  for(const o of dice){
-    if(o===die) continue;
-    if(isAdjacent(die,o)||isAdjacent(o,die)) c++;
-  }
-  return c;
-}
 
 function computeScore(){
   if(!scoreEnabled) return;
@@ -619,8 +889,8 @@ function computeScore(){
   let sum = 0;
 
   for(const d of dice){
-let val = d.set[d.faceIdx].val;
-if(val == null) val = 1;
+    let val = d.set[d.faceIdx].val;
+    if(val == null) val = 1;
 
     let horizontal = false;
     let vertical = false;
@@ -635,105 +905,113 @@ if(val == null) val = 1;
       const overlapY = overlap(A.top, A.bottom, B.top, B.bottom);
       const need = A.side * 0.5;
 
-      // vodorovné spojení (vlevo/vpravo)
       if(overlapY >= need){
         if(Math.abs(A.left - (B.right + SNAP_GAP)) <= CONNECT_EPS) horizontal = true;
         if(Math.abs(A.right - (B.left - SNAP_GAP)) <= CONNECT_EPS) horizontal = true;
       }
 
-      // svislé spojení (nahoře/dole)
       if(overlapX >= need){
         if(Math.abs(A.top - (B.bottom + SNAP_GAP)) <= CONNECT_EPS) vertical = true;
         if(Math.abs(A.bottom - (B.top - SNAP_GAP)) <= CONNECT_EPS) vertical = true;
       }
     }
 
-    if(!horizontal && !vertical){
-      sum -= val;
-    } else if(horizontal && vertical){
-      sum += 2 * val;
-    } else {
-      sum += val;
-    }
+    if(!horizontal && !vertical) sum -= val;
+    else if(horizontal && vertical) sum += 2 * val;
+    else sum += val;
   }
 
   scoreBox.textContent = "Skóre: " + sum;
 }
 
-
 /* ==== TIMER ==== */
 let timerSeconds = 300;
+let remainingSeconds = 300;
 let timerInterval = null;
 let timerRunning = false;
 
 const timerBtn = document.getElementById("timerBtn");
 const timerStartBtn = document.getElementById("timerStartBtn");
-const timerDisplay = document.getElementById("timerDisplay");
 const timeUpMsg = document.getElementById("timeUpMsg");
 
 function formatTime(s){
+  s = Math.max(0, s|0);
   const m = Math.floor(s/60);
   const sec = s%60;
   return m + ":" + String(sec).padStart(2,"0");
 }
 
-timerBtn.textContent = formatTime(timerSeconds);
-timerDisplay.textContent = formatTime(timerSeconds);
+function updateTimerButton(){
+  timerBtn.textContent = formatTime(remainingSeconds);
+}
+
+remainingSeconds = timerSeconds;
+updateTimerButton();
 
 timerBtn.addEventListener("click", ()=>{
-  let input = prompt("Zadej čas (mm:ss)", formatTime(timerSeconds || 0));
+  if(timerRunning) return;
+
+  let input = prompt("Zadej čas (mm:ss)", formatTime(timerSeconds || 300));
   if(!input) return;
 
-  const parts = input.split(":");
+  const parts = input.trim().split(":");
   if(parts.length !== 2) return;
 
-  const m = parseInt(parts[0]);
-  const s = parseInt(parts[1]);
+  const m = parseInt(parts[0],10);
+  const s = parseInt(parts[1],10);
 
-  if(isNaN(m) || isNaN(s)) return;
+  if(isNaN(m) || isNaN(s) || m < 0 || s < 0 || s > 59) return;
 
   timerSeconds = m*60 + s;
-  timerBtn.textContent = formatTime(timerSeconds);
- });
+  remainingSeconds = timerSeconds;
+  updateTimerButton();
+});
 
 timerStartBtn.addEventListener("click", ()=>{
-  if(!timerRunning){
-    startTimer();
-  }else{
-    stopTimer();
-  }
+  if(!timerRunning) startTimer();
+  else stopTimer();
 });
 
 function startTimer(){
   if(timerInterval) clearInterval(timerInterval);
 
-  let t = timerSeconds;
+  if(remainingSeconds <= 0) remainingSeconds = timerSeconds || 300;
+
   timerRunning = true;
   timerStartBtn.textContent = "Stop";
-  timerDisplay.textContent = formatTime(t);
+  updateTimerButton();
 
   timerInterval = setInterval(()=>{
-    t--;
-    timerDisplay.textContent = formatTime(t);
+    remainingSeconds--;
+    updateTimerButton();
 
-    if(t <= 0){
+    if(remainingSeconds <= 0){
       clearInterval(timerInterval);
+      timerInterval = null;
       timerRunning = false;
       timerStartBtn.textContent = "Start";
+      remainingSeconds = 0;
+      updateTimerButton();
 
       for(let i=0;i<3;i++) setTimeout(beep, i*200);
 
       timeUpMsg.style.display = "block";
       setTimeout(()=> timeUpMsg.style.display = "none", 2000);
+
+      /* defaultně se pro další hru vrátí 5:00 */
+      timerSeconds = 300;
+      remainingSeconds = 300;
+      setTimeout(updateTimerButton, 2100);
     }
   },1000);
 }
 
 function stopTimer(){
   clearInterval(timerInterval);
+  timerInterval = null;
   timerRunning = false;
   timerStartBtn.textContent = "Start";
-  timerDisplay.textContent = "";
+  updateTimerButton();
 }
 
 function beep(){
@@ -760,8 +1038,8 @@ document.getElementById("checkWordBtn").addEventListener("click", ()=>{
     "width=900,height=700"
   );
 });
-
 </script>
+
 <!-- Registrace SW pro PWA offline -->
 <script>
 if ('serviceWorker' in navigator) {
@@ -770,10 +1048,6 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.error('SW registrace selhala:', err));
   });
 }
-
-
 </script>
-
-
 </body>
 </html>
