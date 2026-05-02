@@ -1073,9 +1073,20 @@ document.getElementById("checkWordBtn").addEventListener("click", ()=>{
 <!-- Registrace SW pro PWA offline -->
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .catch(err => console.error('SW registrace selhala:', err));
+  window.addEventListener('load', async () => {
+    const reg = await navigator.serviceWorker.register('./sw.js', {
+      updateViaCache: 'none'
+    });
+
+    reg.update();
+
+    let refreshing = false;
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
   });
 }
 </script>
