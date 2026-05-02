@@ -1,5 +1,5 @@
 // sw.js — Skládání slov PWA offline
-const CACHE_NAME = 'skladani-slov-v12';
+const CACHE_NAME = 'skladani-slov-v13';
 
 const ASSETS = [
   './',
