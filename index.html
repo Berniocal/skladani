@@ -840,7 +840,7 @@ syncSizes();
 newGame(seed);
 applyStyle();
 updateLangBtn();
-computeScore();
+
 
 window.addEventListener("resize", ()=>{});
 window.addEventListener("pointerup", (e)=>{
@@ -875,6 +875,7 @@ window.addEventListener("keydown", (e)=>{
 /* ==== skóre - defaultně vypnuté ==== */
 const scoreBox = document.getElementById("scoreBox");
 const scoreToggle = document.getElementById("scoreToggle");
+  computeScore();
 
 scoreToggle.addEventListener("click", ()=>{
   scoreEnabled = !scoreEnabled;
