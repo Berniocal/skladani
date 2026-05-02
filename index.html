@@ -1090,5 +1090,132 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+  <script>
+let deferredPrompt = null;
+
+// uživatel nechce být rušen
+const installPref = localStorage.getItem("pwa_install_choice");
+
+// kontrola, zda už běží jako PWA
+function isPWAInstalled() {
+  return window.matchMedia('(display-mode: standalone)').matches ||
+         window.navigator.standalone === true;
+}
+
+// vytvoření modalu
+function showInstallPrompt() {
+  if (!deferredPrompt) return;
+  if (installPref === "never") return;
+  if (isPWAInstalled()) return;
+
+  // pokud už existuje, nevytvářej znovu
+  if (document.getElementById("pwaInstallModal")) return;
+
+  const modal = document.createElement("div");
+  modal.id = "pwaInstallModal";
+  modal.innerHTML = `
+    <div class="pwa-install-overlay">
+      <div class="pwa-install-box">
+        <h3>Nainstalovat aplikaci?</h3>
+        <p>Přidej si Skládání slov na plochu pro rychlejší spuštění a offline režim.</p>
+        <div class="pwa-buttons">
+          <button id="pwaYes">Instalovat</button>
+          <button id="pwaLater">Později</button>
+          <button id="pwaNever">Neptat se</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById("pwaYes").onclick = async () => {
+    modal.remove();
+    deferredPrompt.prompt();
+    const result = await deferredPrompt.userChoice;
+    if (result.outcome !== "accepted") {
+      localStorage.setItem("pwa_install_choice", "later");
+    }
+    deferredPrompt = null;
+  };
+
+  document.getElementById("pwaLater").onclick = () => {
+    localStorage.setItem("pwa_install_choice", "later");
+    modal.remove();
+  };
+
+  document.getElementById("pwaNever").onclick = () => {
+    localStorage.setItem("pwa_install_choice", "never");
+    modal.remove();
+  };
+}
+
+// zachycení install eventu
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  // malé zpoždění, ať nevyskočí okamžitě
+  setTimeout(() => {
+    if (installPref !== "never" && !isPWAInstalled()) {
+      showInstallPrompt();
+    }
+  }, 1200);
+});
+</script>
+
+<style>
+.pwa-install-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
+  padding:20px;
+  backdrop-filter:blur(8px);
+}
+.pwa-install-box{
+  max-width:380px;
+  width:100%;
+  background:#111827;
+  color:white;
+  border:1px solid #334155;
+  border-radius:20px;
+  padding:22px;
+  text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+}
+.pwa-install-box h3{
+  margin-top:0;
+  font-size:22px;
+}
+.pwa-install-box p{
+  color:#cbd5e1;
+  font-size:15px;
+  line-height:1.5;
+}
+.pwa-buttons{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:18px;
+}
+.pwa-buttons button{
+  padding:12px;
+  border:none;
+  border-radius:14px;
+  font-size:16px;
+  cursor:pointer;
+  background:#2563eb;
+  color:white;
+}
+.pwa-buttons button:nth-child(2){
+  background:#475569;
+}
+.pwa-buttons button:nth-child(3){
+  background:#991b1b;
+}
+</style>
 </body>
 </html>
