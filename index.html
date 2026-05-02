@@ -286,7 +286,12 @@ body, .die, .die *{
 .modal-body p,.modal-body li{color:var(--text);font-size:14px;line-height:1.48}
 .modal-body ul{margin:6px 0 12px 18px}
 .smallnote{color:var(--muted);font-size:12px;margin-top:10px;opacity:.95}
-
+.iconBtn{
+  width:48px;
+  min-width:48px;
+  padding:10px 0;
+  text-align:center;
+}
 #timeUpMsg{
   position:absolute;
   top:50%;
@@ -304,6 +309,7 @@ body, .die, .die *{
 }
 /* ==== SPODNÍ LIŠTA ==== */
 /* ==== SPODNÍ LIŠTA ==== */
+/* ==== SPODNÍ LIŠTA ==== */
 .bottomBar{
   position:fixed;
   bottom:0;
@@ -311,7 +317,7 @@ body, .die, .die *{
   width:100%;
 
   display:grid;
-  grid-template-columns:1fr 1fr 1fr;
+  grid-template-columns:1fr auto;
 
   align-items:center;
 
@@ -326,7 +332,6 @@ body, .die, .die *{
 }
 
 .bottom-left,
-.bottom-center,
 .bottom-right{
   display:flex;
   align-items:center;
@@ -336,10 +341,7 @@ body, .die, .die *{
 .bottom-left{
   justify-content:flex-start;
   gap:8px;
-}
-
-.bottom-center{
-  justify-content:center;
+  flex-wrap:nowrap;
 }
 
 .bottom-right{
@@ -381,9 +383,10 @@ body, .die, .die *{
 <body>
 <div class="app">
   <div class="topbar">
-    <button class="btn" id="rulesBtn">Pravidla</button>
-    <button class="btn" id="themeBtn">Režim: tmavý</button>
-    <div class="code-box" contenteditable="true" id="seedBox" title="Klikni a uprav kód"></div>
+<button class="btn" id="rulesBtn">Pravidla</button>
+<div class="code-box" contenteditable="true" id="seedBox" title="Klikni a uprav kód"></div>
+<button class="btn iconBtn" id="themeBtn" title="Přepnout režim">🌙</button>
+   
   </div>
 
   <div class="controls" id="controls">
@@ -504,10 +507,9 @@ let theme = localStorage.getItem("worddice_theme") || "dark";
 
 function applyTheme(){
   document.body.classList.toggle("light", theme === "light");
-  themeBtn.textContent = theme === "light" ? "Režim: světlý" : "Režim: tmavý";
+  themeBtn.textContent = theme === "light" ? "☀️" : "🌙";
   themeColor.setAttribute("content", theme === "light" ? "#f6f1e8" : "#0f1722");
 }
-
 themeBtn.addEventListener("click", ()=>{
   theme = theme === "light" ? "dark" : "light";
   localStorage.setItem("worddice_theme", theme);
