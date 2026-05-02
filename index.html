@@ -310,16 +310,16 @@ body, .die, .die *{
 /* ==== SPODNÍ LIŠTA ==== */
 /* ==== SPODNÍ LIŠTA ==== */
 /* ==== SPODNÍ LIŠTA ==== */
+/* ==== SPODNÍ LIŠTA ==== */
 .bottomBar{
   position:fixed;
   bottom:0;
   left:0;
   width:100%;
 
-  display:grid;
-  grid-template-columns:1fr auto;
-
+  display:flex;
   align-items:center;
+  justify-content:space-between;
 
   padding:8px 12px max(8px, env(safe-area-inset-bottom));
 
@@ -335,17 +335,25 @@ body, .die, .die *{
 .bottom-right{
   display:flex;
   align-items:center;
+  gap:8px;
   min-width:0;
 }
 
 .bottom-left{
   justify-content:flex-start;
-  gap:8px;
-  flex-wrap:nowrap;
 }
 
 .bottom-right{
   justify-content:flex-end;
+}
+
+/* všechny 4 prvky v jedné řadě */
+.bottomBar{
+  gap:12px;
+}
+
+.bottom-center{
+  display:none;
 }
 .bottomBar .btn{
   padding:8px 14px;
