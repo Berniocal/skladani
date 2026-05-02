@@ -303,6 +303,7 @@ body, .die, .die *{
   backdrop-filter:blur(10px);
 }
 /* ==== SPODNÍ LIŠTA ==== */
+/* ==== SPODNÍ LIŠTA ==== */
 .bottomBar{
   position:fixed;
   bottom:0;
@@ -310,12 +311,9 @@ body, .die, .die *{
   width:100%;
 
   display:grid;
-  grid-template-columns:auto auto auto auto;
+  grid-template-columns:1fr 1fr 1fr;
 
   align-items:center;
-  justify-content:center;
-
-  column-gap:12px;
 
   padding:8px 12px max(8px, env(safe-area-inset-bottom));
 
@@ -336,21 +334,17 @@ body, .die, .die *{
 }
 
 .bottom-left{
-  display:flex;
-  gap:12px;
   justify-content:flex-start;
+  gap:8px;
 }
 
 .bottom-center{
-  display:flex;
   justify-content:center;
 }
 
 .bottom-right{
-  display:flex;
   justify-content:flex-end;
 }
-
 .bottomBar .btn{
   padding:8px 14px;
   font-size:14px;
