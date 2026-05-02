@@ -1,82 +1,77 @@
-// sw.js — Slovní kostky PWA offline
-// ↑ při každé úpravě SW ZVYŠ cache name -> vynutí se update
-const CACHE_NAME = 'skladani-slov-v4-2026-12-46';
+// sw.js — Skládání slov PWA offline
+const CACHE_NAME = 'skladani-slov-v5';
 
 const ASSETS = [
   './',
-  './index.html',
   './manifest.webmanifest',
-  './sw.js',
-
-  // Ikony PWA
   './icons/icon-192.png',
   './icons/icon-512.png',
-
-  // Textura dřeva (ujisti se, že název sedí!)
   './icons/wood-texture.jpg'
 ];
 
-// Instalace: precache základní shell
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
+
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
-  self.skipWaiting(); // nový SW se hned aktivuje
 });
 
-// Aktivace: smaž staré cache
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
+    caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter((k) => k !== CACHE_NAME)
-          .map((k) => caches.delete(k))
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
       )
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Fetch strategie:
-// - navigace (HTML stránky) -> vždy vrať index.html (SPA)
-// - stejné origin assety -> cache-first + doplnění
-// - cizí origin -> network-first bez ukládání
 self.addEventListener('fetch', (event) => {
   const req = event.request;
+
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
   const sameOrigin = url.origin === self.location.origin;
 
-  // Navigace (kliknutí na link / refresh) – vrať shell
-  if (req.mode === 'navigate') {
+  // sw.js nikdy neber z cache
+  if (url.pathname.endsWith('/sw.js')) {
+    event.respondWith(fetch(req, { cache: 'no-store' }));
+    return;
+  }
+
+  // HTML / navigace: vždy zkus síť, cache jen jako záloha
+  if (req.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('/')) {
     event.respondWith(
-      fetch(req).catch(() => caches.match('./index.html'))
+      fetch(req, { cache: 'no-store' })
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+          return res;
+        })
+        .catch(() => caches.match('./index.html'))
     );
     return;
   }
 
+  // Ostatní soubory: cache first
   if (sameOrigin) {
     event.respondWith(
-      caches.match(req).then((cached) => {
+      caches.match(req).then(cached => {
         if (cached) return cached;
 
-        return fetch(req)
-          .then((res) => {
-            // cacheuj jen OK odpovědi
-            if (!res || res.status !== 200) return res;
+        return fetch(req).then(res => {
+          if (!res || res.status !== 200) return res;
 
-            const copy = res.clone();
-            caches.open(CACHE_NAME).then((c) => c.put(req, copy));
-            return res;
-          })
-          .catch(() => caches.match('./index.html'));
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
+
+          return res;
+        });
       })
-    );
-  } else {
-    event.respondWith(
-      fetch(req).catch(() => new Response('', { status: 204 }))
     );
   }
 });
