@@ -302,20 +302,26 @@ body, .die, .die *{
   padding:18px 24px;
   backdrop-filter:blur(10px);
 }
-
 /* ==== SPODNÍ LIŠTA ==== */
 .bottomBar{
   position:fixed;
   bottom:0;
   left:0;
   width:100%;
-  display:flex;
+
+  display:grid;
+  grid-template-columns:auto auto auto auto;
+
   align-items:center;
-  justify-content:space-between;
-  gap:10px;
+  justify-content:center;
+
+  column-gap:12px;
+
   padding:8px 12px max(8px, env(safe-area-inset-bottom));
+
   background:color-mix(in srgb, var(--panel) 92%, transparent);
   border-top:1px solid var(--line);
+
   z-index:2000;
   box-shadow:0 -10px 30px rgba(0,0,0,.18);
   backdrop-filter:var(--glass);
@@ -324,15 +330,26 @@ body, .die, .die *{
 .bottom-left,
 .bottom-center,
 .bottom-right{
-  flex:1;
   display:flex;
   align-items:center;
   min-width:0;
 }
 
-.bottom-left{justify-content:flex-start;gap:8px}
-.bottom-center{justify-content:center;gap:8px}
-.bottom-right{justify-content:flex-end}
+.bottom-left{
+  display:flex;
+  gap:12px;
+  justify-content:flex-start;
+}
+
+.bottom-center{
+  display:flex;
+  justify-content:center;
+}
+
+.bottom-right{
+  display:flex;
+  justify-content:flex-end;
+}
 
 .bottomBar .btn{
   padding:8px 14px;
