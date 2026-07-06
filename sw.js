@@ -1,8 +1,10 @@
-// sw.js — Skládání slov PWA offline
-const CACHE_NAME = 'skladani-slov-v17';
+// sw.js - Skladani slov PWA offline
+const CACHE_NAME = 'skladani-slov-v18';
+const APP_SHELL = './index.html';
 
 const ASSETS = [
   './',
+  APP_SHELL,
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -43,24 +45,30 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // HTML / navigace: vždy zkus síť, cache jen jako záloha
+  // HTML / navigace: vzdy zkus sit, cache jen jako zaloha
   if (req.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('/')) {
     event.respondWith(
       fetch(req, { cache: 'no-store' })
         .then(res => {
           const copy = res.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+          caches.open(CACHE_NAME).then(cache => cache.put(APP_SHELL, copy));
           return res;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(async () => {
+          const cached = await caches.match(APP_SHELL) || await caches.match('./');
+          return cached || new Response('Aplikace neni dostupna offline.', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+          });
+        })
     );
     return;
   }
 
-  // Ostatní soubory: cache first
+  // Ostatni soubory: cache first
   if (sameOrigin) {
     event.respondWith(
-      caches.match(req).then(cached => {
+      caches.match(req, { ignoreSearch: true }).then(cached => {
         if (cached) return cached;
 
         return fetch(req).then(res => {
@@ -70,7 +78,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
 
           return res;
-        });
+        }).catch(() => cached);
       })
     );
   }

@@ -1107,11 +1107,15 @@ document.getElementById("checkWordBtn").addEventListener("click", ()=>{
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
-    const reg = await navigator.serviceWorker.register('./sw.js', {
-      updateViaCache: 'none'
-    });
+    try {
+      const reg = await navigator.serviceWorker.register('./sw.js', {
+        updateViaCache: 'none'
+      });
 
-    reg.update();
+      reg.update();
+    } catch (err) {
+      console.warn('Service worker se nepodarilo zaregistrovat:', err);
+    }
 
     let refreshing = false;
 
@@ -1125,23 +1129,30 @@ if ('serviceWorker' in navigator) {
 </script>
   <script>
 let deferredPrompt = null;
+const INSTALL_PREF_KEY = "pwa_install_choice";
 
-// uživatel nechce být rušen
-const installPref = localStorage.getItem("pwa_install_choice");
+function getInstallPref() {
+  return localStorage.getItem(INSTALL_PREF_KEY);
+}
 
-// kontrola, zda už běží jako PWA
+// kontrola, zda uz bezi jako PWA
 function isPWAInstalled() {
   return window.matchMedia('(display-mode: standalone)').matches ||
          window.navigator.standalone === true;
 }
 
-// vytvoření modalu
+function closeInstallPrompt() {
+  const modal = document.getElementById("pwaInstallModal");
+  if (modal) modal.remove();
+}
+
+// vytvoreni modalu
 function showInstallPrompt() {
   if (!deferredPrompt) return;
-  if (installPref === "never") return;
+  if (getInstallPref() === "never") return;
   if (isPWAInstalled()) return;
 
-  // pokud už existuje, nevytvářej znovu
+  // pokud uz existuje, nevytvarej znovu
   if (document.getElementById("pwaInstallModal")) return;
 
   const modal = document.createElement("div");
@@ -1154,7 +1165,7 @@ function showInstallPrompt() {
         <div class="pwa-buttons">
           <button id="pwaYes">Instalovat</button>
           <button id="pwaLater">Později</button>
-          <button id="pwaNever">Neptat se</button>
+          <button id="pwaNever">Nikdy</button>
         </div>
       </div>
     </div>
@@ -1162,37 +1173,44 @@ function showInstallPrompt() {
   document.body.appendChild(modal);
 
   document.getElementById("pwaYes").onclick = async () => {
-    modal.remove();
+    closeInstallPrompt();
     deferredPrompt.prompt();
     const result = await deferredPrompt.userChoice;
     if (result.outcome !== "accepted") {
-      localStorage.setItem("pwa_install_choice", "later");
+      localStorage.setItem(INSTALL_PREF_KEY, "later");
     }
     deferredPrompt = null;
   };
 
   document.getElementById("pwaLater").onclick = () => {
-    localStorage.setItem("pwa_install_choice", "later");
-    modal.remove();
+    localStorage.setItem(INSTALL_PREF_KEY, "later");
+    closeInstallPrompt();
   };
 
   document.getElementById("pwaNever").onclick = () => {
-    localStorage.setItem("pwa_install_choice", "never");
-    modal.remove();
+    localStorage.setItem(INSTALL_PREF_KEY, "never");
+    deferredPrompt = null;
+    closeInstallPrompt();
   };
 }
 
-// zachycení install eventu
+// zachyceni install eventu
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
 
-  // malé zpoždění, ať nevyskočí okamžitě
+  // male zpozdeni, at nevyskoci okamzite
   setTimeout(() => {
-    if (installPref !== "never" && !isPWAInstalled()) {
+    if (getInstallPref() !== "never" && !isPWAInstalled()) {
       showInstallPrompt();
     }
   }, 1200);
+});
+
+window.addEventListener("appinstalled", () => {
+  localStorage.setItem(INSTALL_PREF_KEY, "installed");
+  deferredPrompt = null;
+  closeInstallPrompt();
 });
 </script>
 
@@ -1211,9 +1229,9 @@ window.addEventListener("beforeinstallprompt", (e) => {
 .pwa-install-box{
   max-width:380px;
   width:100%;
-  background:#111827;
-  color:white;
-  border:1px solid #334155;
+  background:var(--panel);
+  color:var(--text);
+  border:1px solid var(--line);
   border-radius:20px;
   padding:22px;
   text-align:center;
@@ -1224,7 +1242,7 @@ window.addEventListener("beforeinstallprompt", (e) => {
   font-size:22px;
 }
 .pwa-install-box p{
-  color:#cbd5e1;
+  color:var(--muted);
   font-size:15px;
   line-height:1.5;
 }
@@ -1236,18 +1254,21 @@ window.addEventListener("beforeinstallprompt", (e) => {
 }
 .pwa-buttons button{
   padding:12px;
-  border:none;
+  border:1px solid color-mix(in srgb, var(--accent) 45%, transparent);
   border-radius:14px;
   font-size:16px;
   cursor:pointer;
-  background:#2563eb;
+  background:var(--accent);
   color:white;
 }
 .pwa-buttons button:nth-child(2){
-  background:#475569;
+  background:var(--btn2);
+  color:var(--text);
+  border-color:var(--line);
 }
 .pwa-buttons button:nth-child(3){
-  background:#991b1b;
+  background:color-mix(in srgb, var(--danger) 72%, #111827);
+  border-color:color-mix(in srgb, var(--danger) 55%, transparent);
 }
 </style>
 </body>
