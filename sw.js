@@ -1,5 +1,6 @@
 // sw.js - Skladani slov PWA offline
-const CACHE_NAME = 'skladani-slov-v18';
+const CACHE_PREFIX = 'skladani-slov-';
+const CACHE_NAME = `${CACHE_PREFIX}v18`;
 const APP_SHELL = './index.html';
 
 const ASSETS = [
@@ -24,7 +25,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(key => key !== CACHE_NAME)
+          .filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
           .map(key => caches.delete(key))
       )
     ).then(() => self.clients.claim())
